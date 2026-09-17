@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+<head><base target="_top"><?!= include('Styles'); ?></head>
+<body>
+
+<div class="topbar"><div class="topbar-in">
+  <a class="logo" id="logoLink" href="#" target="_top"><div class="mk">PD</div><div class="nm">Celebration Book</div></a>
+</div></div>
+
+<div class="page-narrow">
+
+  <div id="doneView" class="hidden">
+    <div class="head"><div class="sp"><h1>Book created</h1><p class="lede" id="doneSub"></p></div></div>
+    <div class="note ok" id="doneNote">Your celebration book is ready.</div>
+    <div class="panel"><div class="panel-b">
+      <div class="btnrow">
+        <a class="btn lg" id="doneManage" href="#" target="_top">Open book settings</a>
+        <a class="btn sec lg" id="donePreview" href="#" target="_blank">Preview the book</a>
+        <a class="btn sec lg" id="doneHome" href="#" target="_top">My books</a>
+      </div>
+      <div class="sep"></div>
+      <label>Contribution link — share this with colleagues</label>
+      <div class="copyrow">
+        <input type="text" id="doneLink" readonly>
+        <button class="btn sec" onclick="copyFrom('doneLink',this)">Copy</button>
+      </div>
+    </div></div>
+  </div>
+
+  <div id="formView">
+    <div class="crumb"><a id="crumbHome" href="#" target="_top">My books</a> &rsaquo; New book</div>
+    <div class="head"><div class="sp">
+      <h1 id="pageTitle">Create a celebration book</h1>
+      <p class="lede">Set it up once, share the link, and colleagues each add a page.</p>
+    </div></div>
+
+    <div id="msg"></div>
+
+    <div class="panel">
+      <div class="panel-h"><h2>The occasion</h2></div>
+      <div class="panel-b">
+        <div class="mockrow">
+          <div class="mcol">
+            <div class="field">
+              <label for="occasion">Occasion title</label>
+              <input type="text" id="occasion" maxlength="60" placeholder="Congratulations">
+              <div id="emoOcc"></div>
+            </div>
+            <div class="field">
+              <label for="honouree">Who are we celebrating</label>
+              <input type="text" id="honouree" maxlength="90" placeholder="Maria Rossi, or The Oncology Team">
+              <div id="emoHon"></div>
+            </div>
+            <div class="field" style="margin-bottom:0">
+              <label for="coverMessage">Cover message <span class="opt">— optional</span></label>
+              <input type="text" id="coverMessage" maxlength="120" placeholder="2026 Community Celebration">
+              <div id="emoCov"></div>
+            </div>
+          </div>
+
+          <div class="cvprev">
+            <div class="mocklbl">Live cover preview</div>
+            <div class="cvcard" id="cvprev"></div>
+            <div class="cvnote">Updates as you type. Emoji appear in the online book and the PDF.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><h2>Cover photo</h2></div>
+      <div class="panel-b">
+        <div class="field" style="margin-bottom:0">
+          <label>Photo for the front of the book <span class="opt">— optional</span></label>
+          <div class="upload" id="coverUp">
+            <div class="t">Choose a cover photo</div>
+            <div class="d">A portrait, or a photo of the whole team</div>
+          </div>
+          <div class="where">
+            <span class="lbl">Appears in</span>
+            <span class="tag on"><i>✓</i> Online book — cover</span>
+            <span class="tag on"><i>✓</i> PDF — front page</span>
+            <span class="tag off"><i>✗</i> Not in the email</span>
+          </div>
+          <input type="file" id="coverFile" accept="image/*" class="hidden">
+          <img id="coverShot" class="shot hidden">
+          <div class="btnrow" style="margin-top:10px">
+            <button class="btn sec sm hidden" id="coverClear" type="button">Remove photo</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><h2>Appearance of the online book</h2></div>
+      <div class="panel-b">
+        <div class="note info" style="font-size:13px">
+          These style the <b>online book only</b>. The PDF and email always use Roche blue.
+        </div>
+        <div class="field">
+          <label>Colour theme</label>
+          <div class="opts" id="themes"></div>
+        </div>
+        <div class="sep"></div>
+        <div class="mockrow">
+          <div class="mcol">
+            <div class="field" style="margin-bottom:0">
+              <label>Page background pattern</label>
+              <div class="opts" id="bgs"></div>
+              <div class="where">
+                <span class="lbl">Appears in</span>
+                <span class="tag on"><i>✓</i> Online book</span>
+                <span class="tag off"><i>✗</i> Not in the PDF</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="mocklbl">Online page preview</div>
+            <div class="mock" id="mock"></div>
+          </div>
+        </div>
+        <div class="sep"></div>
+        <div class="field" style="margin-bottom:0">
+          <label>Custom background image <span class="opt">— optional</span></label>
+          <div class="upload" id="bgUp">
+            <div class="t">Choose a background image</div>
+            <div class="d">A soft white panel keeps messages readable</div>
+          </div>
+          <div class="where">
+            <span class="lbl">Appears in</span>
+            <span class="tag on"><i>✓</i> Online book</span>
+            <span class="tag off"><i>✗</i> Not in the PDF</span>
+            <span class="tag off"><i>✗</i> Not in the email</span>
+          </div>
+          <input type="file" id="bgFile" accept="image/*" class="hidden">
+          <div class="btnrow" style="margin-top:10px">
+            <button class="btn sec sm hidden" id="bgClear" type="button">Remove background image</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><h2>People and timing</h2></div>
+      <div class="panel-b">
+        <div class="field">
+          <label for="welcomeMessage">Guidance for contributors <span class="opt">— optional</span></label>
+          <textarea id="welcomeMessage" maxlength="400" style="min-height:78px"
+            placeholder="Maria is leaving us after 12 years. Please add a memory 🎉"></textarea>
+          <div id="emoWel"></div>
+          <div class="help">Shown on the contribution page.</div>
+        </div>
+        <div class="field">
+          <label for="deadline">Delivery date and time</label>
+          <input type="datetime-local" id="deadline">
+          <div class="note info" style="font-size:13px;margin-top:8px;margin-bottom:0"><b>Contributions close at this time.</b> The finished book is then sent automatically to the recipient(s) below.</div>
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="deputies">Deputies <span class="opt">— optional</span></label>
+            <textarea id="deputies" style="min-height:74px" placeholder="one email per line"></textarea>
+            <div class="help">Same management rights as you, including cancelling and deleting.</div>
+          </div>
+          <div class="field">
+            <label for="recipients">Who receives the finished book</label>
+            <textarea id="recipients" style="min-height:74px" placeholder="one email per line"></textarea>
+            <div class="help">The final book is emailed automatically shortly after the delivery date.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btnrow">
+      <button class="btn lg" id="createBtn">Create book</button>
+      <a class="btn sec lg" id="cancelBtn" href="#" target="_top">Cancel</a>
+    </div>
+  </div>
+</div>
+
+<script>
+var SRC = '<?= bookId ?>';
+var HOME = '';
+var THEMES = [
+  {id:'roche',  name:'Roche Blue',  c1:'#1482FA', c2:'#0B41CD'},
+  {id:'sunset', name:'Sunset',      c1:'#F97316', c2:'#C2410C'},
+  {id:'golden', name:'Golden Hour', c1:'#EAB308', c2:'#A16207'},
+  {id:'blossom',name:'Blossom',     c1:'#F472B6', c2:'#BE185D'},
+  {id:'sage',   name:'Warm Sage',   c1:'#84A98C', c2:'#9A3412'}
+];
+var BGS = [
+  {id:'confetti', name:'Confetti'},{id:'balloons', name:'Balloons'},
+  {id:'streamers',name:'Streamers'},{id:'sparkles',name:'Sparkles'},
+  {id:'plain',    name:'Plain paper'}
+];
+var theme='roche', bgStyle='balloons', coverData='', bgData='';
+
+function drawCover(){
+  renderCoverPreview('cvprev', {
+    theme: theme,
+    occasion: document.getElementById('occasion').value.trim(),
+    honouree: document.getElementById('honouree').value.trim(),
+    coverMessage: document.getElementById('coverMessage').value.trim(),
+    coverImageUrl: coverData
+  });
+}
+function buildThemes(){
+  var h = document.getElementById('themes');
+  h.innerHTML = THEMES.map(function(t){
+    return '<div class="opt-c'+(t.id===theme?' on':'')+'" data-id="'+t.id+'">'+
+      '<div class="sw" style="background:linear-gradient(135deg,'+t.c1+','+t.c2+')"></div>'+
+      '<div class="nm">'+t.name+'</div></div>';
+  }).join('');
+  Array.prototype.forEach.call(h.querySelectorAll('.opt-c'), function(el){
+    el.onclick = function(){ theme = el.getAttribute('data-id');
+      buildThemes(); buildBgs(); drawMock(); drawCover(); };
+  });
+}
+function buildBgs(){
+  var h = document.getElementById('bgs');
+  h.innerHTML = BGS.map(function(b){
+    return '<div class="opt-c'+(b.id===bgStyle?' on':'')+'" data-id="'+b.id+'" data-theme="'+theme+'">'+
+      '<div class="pv"><div class="mini"><div class="l"></div><div class="l"></div><div class="l"></div></div></div>'+
+      '<div class="nm">'+b.name+'</div></div>';
+  }).join('');
+  Array.prototype.forEach.call(h.querySelectorAll('.opt-c'), function(el){
+    var id = el.getAttribute('data-id');
+    applyPattern(el.querySelector('.pv'), id, theme, .6);
+    el.onclick = function(){ bgStyle = id; buildBgs(); drawMock(); };
+  });
+}
+function drawMock(){
+  renderMock(document.getElementById('mock'), {bgStyle:bgStyle, theme:theme, bgImageUrl:bgData||''});
+}
+
+['occasion','honouree','coverMessage'].forEach(function(id){
+  document.getElementById(id).addEventListener('input', drawCover);
+});
+
+document.getElementById('coverUp').onclick = function(){ document.getElementById('coverFile').click(); };
+document.getElementById('coverFile').onchange = function(e){
+  var f = e.target.files[0]; if(!f) return;
+  shrinkImage(f,1400,.85).then(function(d){
+    coverData = d;
+    var s = document.getElementById('coverShot');
+    s.src = d; s.classList.remove('hidden');
+    document.getElementById('coverClear').classList.remove('hidden');
+    drawCover();
+  }).catch(function(err){ notice('msg', esc(err.message), 'err'); });
+};
+document.getElementById('coverClear').onclick = function(){
+  coverData=''; document.getElementById('coverShot').classList.add('hidden');
+  document.getElementById('coverFile').value=''; this.classList.add('hidden'); drawCover();
+};
+
+document.getElementById('bgUp').onclick = function(){ document.getElementById('bgFile').click(); };
+document.getElementById('bgFile').onchange = function(e){
+  var f = e.target.files[0]; if(!f) return;
+  shrinkImage(f,1600,.82).then(function(d){
+    bgData = d;
+    document.getElementById('bgClear').classList.remove('hidden');
+    drawMock();
+  }).catch(function(err){ notice('msg', esc(err.message), 'err'); });
+};
+document.getElementById('bgClear').onclick = function(){
+  bgData=''; document.getElementById('bgFile').value='';
+  this.classList.add('hidden'); drawMock();
+};
+
+document.getElementById('createBtn').onclick = function(){
+  var btn = this;
+  var occ = document.getElementById('occasion').value.trim();
+  var hon = document.getElementById('honouree').value.trim();
+  var p = {
+    occasion: occ, honouree: hon,
+    coverMessage: document.getElementById('coverMessage').value.trim(),
+    welcomeMessage: document.getElementById('welcomeMessage').value.trim(),
+    theme: theme, bgStyle: bgStyle,
+    deadline: document.getElementById('deadline').value,
+    recipients: document.getElementById('recipients').value.trim(),
+    deputies: document.getElementById('deputies').value.trim(),
+    coverImageData: coverData, bgImageData: bgData
+  };
+  if(!p.occasion) return notice('msg','Please enter an occasion title.','err');
+  if(!p.honouree) return notice('msg','Please enter who you are celebrating.','err');
+  if(!p.deadline) return notice('msg','Please choose a delivery date and time.','err');
+
+  btn.disabled = true; btn.innerHTML = '<div class="spin"></div> Creating…';
+  srv('apiCreateBook', p).then(function(r){
+    document.getElementById('doneSub').textContent = occ + ' — ' + hon;
+    document.getElementById('doneManage').href  = r.links.manage;
+    document.getElementById('donePreview').href = r.links.book;
+    document.getElementById('doneHome').href    = HOME || r.links.home;
+    document.getElementById('doneLink').value   = r.links.contribute;
+    document.getElementById('doneNote').textContent =
+      'Your celebration book is ready. Share the contribution link below.';
+    document.getElementById('formView').classList.add('hidden');
+    document.getElementById('doneView').classList.remove('hidden');
+    window.scrollTo(0,0);
+  }).catch(function(e){
+    btn.disabled = false; btn.textContent = 'Create book';
+    notice('msg', esc(e.message||'Could not create the book.'), 'err');
+  });
+};
+
+(function init(){
+  buildThemes(); buildBgs(); drawMock(); drawCover();
+  attachEmoji('occasion','emoOcc',['🎉','🎊','🥳','🏆','✨','🎂','👏','🙏']);
+  attachEmoji('honouree','emoHon',['❤️','⭐','🌟','🥇','💙','🌸','🚀','🎓']);
+  attachEmoji('coverMessage','emoCov',['🎉','💐','✨','🥂','🌈','💖','🎈','🍀']);
+  attachEmoji('welcomeMessage','emoWel',['🎉','🙏','💌','✍️','📸','❤️','🥳','⏰']);
+
+  var d = new Date(); d.setDate(d.getDate()+14); d.setHours(9,0,0,0);
+  var p = function(n){ return (n<10?'0':'')+n; };
+  document.getElementById('deadline').value =
+    d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes());
+
+  srv('apiDashboard').then(function(r){
+    HOME = r.createUrl.replace('?page=create','');
+    document.getElementById('logoLink').href = HOME;
+    document.getElementById('crumbHome').href = HOME;
+    document.getElementById('cancelBtn').href = HOME;
+    document.getElementById('doneHome').href = HOME;
+  });
+
+  if(SRC){
+    srv('apiGetTemplate', SRC).then(function(t){
+      document.getElementById('pageTitle').textContent = 'Duplicate a celebration book';
+      document.getElementById('occasion').value = t.occasion||'';
+      document.getElementById('coverMessage').value = t.coverMessage||'';
+      document.getElementById('welcomeMessage').value = t.welcomeMessage||'';
+      document.getElementById('deputies').value = (t.deputies||'').split(/,\s*/).filter(String).join('\n');
+      theme = t.theme||'roche'; bgStyle = t.bgStyle||'balloons';
+      buildThemes(); buildBgs(); drawMock(); drawCover();
+      notice('msg','Settings copied. Enter who you are celebrating and a new closing date.','info');
+    }).catch(function(){});
+  }
+})();
+</script>
+</body>
+</html>
