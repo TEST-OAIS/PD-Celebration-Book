@@ -1,0 +1,2250 @@
+<!doctype html>
+
+<html>
+
+<head>
+
+  <base target="_top">
+
+  <?!= include('styles'); ?>
+
+</head>
+
+<body>
+
+
+<?!= includeNav(ownerToken); ?>
+
+
+<div class="wrap">
+
+  <div id="app">
+
+    <section class="page-header">
+
+      <div class="hero-badge">
+        Loading Book
+      </div>
+
+      <h1>
+        Just a moment...
+      </h1>
+
+    </section>
+
+  </div>
+
+</div>
+
+
+
+<div
+  id="editBookModal"
+  class="modal-overlay"
+  style="display:none;"
+>
+
+  <div class="modal-card">
+
+
+    <div class="modal-header">
+
+      <div>
+
+        <div class="hero-badge">
+          Edit Celebration
+        </div>
+
+        <h2>
+          Edit Book details
+        </h2>
+
+      </div>
+
+
+      <button
+        class="modal-close"
+        type="button"
+        onclick="closeEditBook()">
+
+        ×
+
+      </button>
+
+    </div>
+
+
+
+    <form id="editBookForm">
+
+
+      <div class="grid">
+
+
+        <div class="field">
+
+          <label>
+            Book title
+          </label>
+
+          <input
+            id="editTitle"
+            maxlength="150"
+            required>
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Occasion
+          </label>
+
+          <select id="editOccasion">
+
+            <option>Birthday</option>
+            <option>Farewell</option>
+            <option>Retirement</option>
+            <option>Anniversary</option>
+            <option>Thank you</option>
+            <option>Congratulations</option>
+            <option>Other</option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+
+
+      <div class="field">
+
+        <label>
+          Recipient name
+        </label>
+
+        <input
+          id="editRecipientName"
+          maxlength="100"
+          required>
+
+      </div>
+
+
+
+      <div class="field">
+
+        <label>
+          Recipient email(s)
+        </label>
+
+        <div id="editRecipientEmails"></div>
+
+
+        <button
+          class="btn secondary add-email-btn"
+          type="button"
+          onclick="addEditEmailRow('')">
+
+          + Add another email
+
+        </button>
+
+
+        <div class="small">
+          All recipients receive the final Book via BCC.
+        </div>
+
+      </div>
+
+
+
+      <div class="field">
+
+        <label>
+          Delivery date & time
+        </label>
+
+        <input
+          id="editSendAt"
+          type="datetime-local"
+          required>
+
+      </div>
+
+
+
+      <div class="field">
+
+        <label>
+          Book style
+        </label>
+
+        <select id="editFormat">
+
+          <option value="classic">
+            Classic Book
+          </option>
+
+          <option value="mosaic">
+            Photo Mosaic
+          </option>
+
+          <option value="cards">
+            Celebration Cards
+          </option>
+
+        </select>
+
+      </div>
+
+
+
+      <div class="modal-actions">
+
+        <button
+          class="btn secondary"
+          type="button"
+          onclick="closeEditBook()">
+
+          Cancel
+
+        </button>
+
+
+        <button
+          class="btn"
+          type="submit"
+          id="saveBookButton">
+
+          Save changes
+
+        </button>
+
+      </div>
+
+
+      <div id="editBookResult"></div>
+
+
+    </form>
+
+
+  </div>
+
+</div>
+
+
+
+<div
+  id="emailPreviewModal"
+  class="modal-overlay"
+  style="display:none;"
+>
+
+  <div class="modal-card email-preview-modal">
+
+
+    <div class="modal-header">
+
+      <div>
+
+        <div class="hero-badge">
+          Final email
+        </div>
+
+        <h2>
+          Preview delivery email
+        </h2>
+
+      </div>
+
+
+      <button
+        class="modal-close"
+        type="button"
+        onclick="closeEmailPreview()">
+
+        ×
+
+      </button>
+
+    </div>
+
+
+
+    <div class="email-meta">
+
+      <div>
+
+        <span class="small">
+          Subject
+        </span>
+
+        <strong id="previewSubject"></strong>
+
+      </div>
+
+
+      <div>
+
+        <span class="small">
+          BCC recipients
+        </span>
+
+        <strong id="previewRecipients"></strong>
+
+      </div>
+
+    </div>
+
+
+
+    <iframe
+      id="emailPreviewFrame"
+      class="email-preview-frame"
+      title="Email preview">
+    </iframe>
+
+
+
+    <div class="modal-actions">
+
+      <button
+        class="btn secondary"
+        type="button"
+        onclick="closeEmailPreview()">
+
+        Close
+
+      </button>
+
+
+      <button
+        class="btn secondary"
+        type="button"
+        id="testFromPreviewButton"
+        onclick="sendTestEmail()">
+
+        Send test to myself
+
+      </button>
+
+
+      <button
+        class="btn"
+        type="button"
+        onclick="sendNow()">
+
+        Send Book now
+
+      </button>
+
+    </div>
+
+
+  </div>
+
+</div>
+
+
+
+<script>
+
+const BOOK =
+  '<?= bookId ?>';
+
+
+const TOKEN =
+  '<?= token ?>';
+
+
+let CURRENT_DATA =
+  null;
+
+
+
+function load() {
+
+  google.script.run
+
+    .withSuccessHandler(
+      function(data) {
+
+        CURRENT_DATA =
+          data;
+
+
+        render(
+          data
+        );
+
+      }
+    )
+
+    .withFailureHandler(
+      function(err) {
+
+        document.getElementById(
+          'app'
+        ).innerHTML = `
+
+          <div class="notice error">
+
+            ${escapeHtml(
+              getErrorMessage(err)
+            )}
+
+          </div>
+
+        `;
+
+      }
+    )
+
+    .getAdminBook(
+      BOOK,
+      TOKEN
+    );
+
+}
+
+
+
+function render(data) {
+
+  const book =
+    data.book;
+
+
+  const contributions =
+    data.contributions || [];
+
+
+  const isOpen =
+    data.status === 'open';
+
+
+  const isSent =
+    data.status === 'sent';
+
+
+  const isCancelled =
+    data.status === 'cancelled';
+
+
+  const recipientCount =
+    (data.recipientEmails || [])
+      .length;
+
+
+  document.getElementById(
+    'app'
+  ).innerHTML = `
+
+
+    <section class="page-header book-admin-header">
+
+
+      <div class="hero-badge">
+
+        ${escapeHtml(
+          book.occasion
+        )}
+
+        ·
+
+        ${escapeHtml(
+          data.status
+        )}
+
+      </div>
+
+
+      <h1>
+
+        ${escapeHtml(
+          book.title
+        )}
+
+      </h1>
+
+
+      <p class="lead">
+
+        Celebrating
+
+        <strong>
+
+          ${escapeHtml(
+            book.recipientName
+          )}
+
+        </strong>
+
+      </p>
+
+
+
+      <div class="book-health-grid">
+
+
+        <div class="book-health-item">
+
+          <span>
+            Recipients
+          </span>
+
+          <strong>
+            ${recipientCount}
+          </strong>
+
+        </div>
+
+
+        <div class="book-health-item">
+
+          <span>
+            Contributions
+          </span>
+
+          <strong>
+            ${contributions.length}
+          </strong>
+
+        </div>
+
+
+        <div class="book-health-item">
+
+          <span>
+            Delivery
+          </span>
+
+          <strong>
+            ${formatDate(
+              book.sendAt
+            )}
+          </strong>
+
+        </div>
+
+
+        <div class="book-health-item">
+
+          <span>
+            Status
+          </span>
+
+          <strong>
+
+            ${
+              isOpen
+                ? 'Open'
+                : isSent
+                  ? 'Delivered'
+                  : isCancelled
+                    ? 'Cancelled'
+                    : 'Closed'
+            }
+
+          </strong>
+
+        </div>
+
+
+      </div>
+
+
+
+      <div class="actions primary-actions">
+
+
+        ${
+          !isSent &&
+          !isCancelled
+            ? `
+
+                <button
+                  class="btn"
+                  type="button"
+                  id="editBookButton">
+
+                  Edit Book
+
+                </button>
+
+              `
+            : ''
+        }
+
+
+        <button
+          class="btn secondary"
+          type="button"
+          id="previewEmailButton">
+
+          Preview Email
+
+        </button>
+
+
+        ${
+          !isCancelled
+            ? `
+
+                <button
+                  class="btn secondary"
+                  type="button"
+                  id="testEmailButton">
+
+                  Send Test to Myself
+
+                </button>
+
+              `
+            : ''
+        }
+
+
+        <a
+          class="btn secondary"
+          target="_blank"
+          rel="noopener"
+          href="${escapeHtml(
+            data.links.recipientUrl
+          )}">
+
+          Preview Book
+
+        </a>
+
+
+        ${
+          data.archiveFolderUrl
+            ? `
+
+                <a
+                  class="btn secondary"
+                  target="_blank"
+                  rel="noopener"
+                  href="${escapeHtml(
+                    data.archiveFolderUrl
+                  )}">
+
+                  Open Drive Archive
+
+                </a>
+
+              `
+            : ''
+        }
+
+
+        ${
+          !isSent &&
+          !isCancelled
+            ? `
+
+                <button
+                  class="btn secondary"
+                  type="button"
+                  id="sendButton">
+
+                  Send Now
+
+                </button>
+
+              `
+            : ''
+        }
+
+
+        ${
+          isSent
+            ? `
+
+                <span class="delivered-badge">
+                  Delivered
+                </span>
+
+              `
+            : ''
+        }
+
+
+        ${
+          isCancelled
+            ? `
+
+                <span class="cancelled-badge">
+                  Cancelled
+                </span>
+
+              `
+            : ''
+        }
+
+
+      </div>
+
+
+    </section>
+
+
+
+    ${
+      !isCancelled &&
+      !isSent
+        ? `
+
+            <div class="card">
+
+
+              <div class="section-title">
+
+                <div class="section-icon">
+                  💌
+                </div>
+
+                <div>
+
+                  <h2 style="margin-bottom:4px;">
+                    Invite colleagues
+                  </h2>
+
+                  <div class="small">
+
+                    Share this link so colleagues
+                    can add an image, GIF or message.
+
+                  </div>
+
+                </div>
+
+              </div>
+
+
+              <div class="linkbox">
+
+                <input
+                  readonly
+                  value="${escapeHtml(
+                    data.links.contributionUrl
+                  )}">
+
+                <button
+                  class="btn secondary"
+                  type="button"
+                  id="copyContributionButton">
+
+                  Copy
+
+                </button>
+
+              </div>
+
+
+              <div class="contribution-actions">
+
+                <button
+                  class="btn secondary"
+                  type="button"
+                  id="lockButton">
+
+                  ${
+                    isOpen
+                      ? 'Lock contributions'
+                      : 'Re-open contributions'
+                  }
+
+                </button>
+
+              </div>
+
+
+            </div>
+
+          `
+        : ''
+    }
+
+
+
+    <div class="card">
+
+
+      <div class="section-title">
+
+        <div class="section-icon">
+          🎨
+        </div>
+
+
+        <div>
+
+          <h2 style="margin-bottom:4px;">
+
+            ${contributions.length}
+
+            contribution${
+              contributions.length === 1
+                ? ''
+                : 's'
+            }
+
+          </h2>
+
+          <div class="small">
+            Review the Book before delivery.
+          </div>
+
+        </div>
+
+      </div>
+
+
+      ${
+        contributions.length
+          ? `
+
+              <div
+                class="bookgrid ${escapeHtml(
+                  book.format
+                )}"
+              >
+
+                ${
+                  contributions
+                    .map(
+                      renderContribution
+                    )
+                    .join('')
+                }
+
+              </div>
+
+            `
+          : `
+
+              <div class="empty-state">
+
+                <div class="empty-emoji">
+                  📭
+                </div>
+
+                <h3>
+                  No memories yet
+                </h3>
+
+                <p class="small">
+
+                  Share the contribution link
+                  with colleagues to get started.
+
+                </p>
+
+              </div>
+
+            `
+      }
+
+
+    </div>
+
+
+
+    <div class="card danger-zone">
+
+
+      <div>
+
+        <h3>
+          Archive & delete
+        </h3>
+
+        <p class="small">
+
+          Remove Book from App keeps the Drive folder,
+          uploaded pictures, GIFs and generated Slides.
+
+          <br><br>
+
+          Delete Book & Files permanently removes
+          the Book and its stored media.
+
+        </p>
+
+      </div>
+
+
+      <div class="danger-zone-actions">
+
+
+        ${
+          !isSent &&
+          !isCancelled
+            ? `
+
+                <button
+                  class="btn warning"
+                  type="button"
+                  id="cancelBookButton">
+
+                  Cancel Book
+
+                </button>
+
+              `
+            : ''
+        }
+
+
+        <button
+          class="btn secondary"
+          type="button"
+          id="archiveBookButton">
+
+          Remove Book from App
+
+        </button>
+
+
+        <button
+          class="btn danger"
+          type="button"
+          id="deleteBookFilesButton">
+
+          Delete Book & Files
+
+        </button>
+
+
+      </div>
+
+
+    </div>
+
+  `;
+
+
+  bindPageActions(
+    data,
+    isOpen
+  );
+
+}
+
+
+
+function renderContribution(item) {
+
+  const mediaType =
+    item.mediaType ||
+    (
+      item.photoDataUrl
+        ? 'image'
+        : 'text'
+    );
+
+
+  const mediaBadge =
+    mediaType === 'gif'
+      ? 'GIF'
+      : mediaType === 'text'
+        ? 'TEXT'
+        : 'IMAGE';
+
+
+  const textOnly =
+    mediaType === 'text';
+
+
+  return `
+
+    <article
+      class="entry"
+      ${
+        textOnly
+          ? 'style="display:block;"'
+          : ''
+      }
+    >
+
+      ${
+        !textOnly &&
+        item.photoDataUrl
+          ? `
+
+              <img
+                src="${escapeHtml(
+                  item.photoDataUrl
+                )}"
+                alt="${
+                  mediaType === 'gif'
+                    ? 'Animated GIF'
+                    : 'Memory'
+                }">
+
+            `
+          : ''
+      }
+
+
+      <div class="entrytext">
+
+        <div
+          class="small"
+          style="
+            margin-bottom:10px;
+            font-weight:800;
+            color:#7655f6;
+          "
+        >
+          ${mediaBadge}
+        </div>
+
+        <div class="quote-mark">
+          “
+        </div>
+
+        <p>
+
+          ${escapeHtml(
+            item.message
+          )}
+
+        </p>
+
+        <div class="entryname">
+
+          — ${escapeHtml(
+            item.name
+          )}
+
+        </div>
+
+
+        ${
+          CURRENT_DATA &&
+          CURRENT_DATA.status !== 'sent' &&
+          CURRENT_DATA.status !== 'cancelled'
+            ? `
+
+                <div class="entry-admin-actions">
+
+                  <button
+                    class="btn danger small-btn"
+                    data-delete-id="${escapeHtml(
+                      item.id
+                    )}">
+
+                    Remove
+
+                  </button>
+
+                </div>
+
+              `
+            : ''
+        }
+
+
+      </div>
+
+    </article>
+
+  `;
+
+}
+
+
+
+function bindPageActions(
+  data,
+  isOpen
+) {
+
+  const editBookButton =
+    document.getElementById(
+      'editBookButton'
+    );
+
+
+  if (editBookButton) {
+
+    editBookButton.addEventListener(
+      'click',
+      openEditBook
+    );
+
+  }
+
+
+  const previewEmailButton =
+    document.getElementById(
+      'previewEmailButton'
+    );
+
+
+  if (previewEmailButton) {
+
+    previewEmailButton.addEventListener(
+      'click',
+      previewEmail
+    );
+
+  }
+
+
+  const testEmailButton =
+    document.getElementById(
+      'testEmailButton'
+    );
+
+
+  if (testEmailButton) {
+
+    testEmailButton.addEventListener(
+      'click',
+      sendTestEmail
+    );
+
+  }
+
+
+  const sendButton =
+    document.getElementById(
+      'sendButton'
+    );
+
+
+  if (sendButton) {
+
+    sendButton.addEventListener(
+      'click',
+      sendNow
+    );
+
+  }
+
+
+  const copyContributionButton =
+    document.getElementById(
+      'copyContributionButton'
+    );
+
+
+  if (copyContributionButton) {
+
+    copyContributionButton.addEventListener(
+      'click',
+      function() {
+
+        copyText(
+          data.links.contributionUrl
+        );
+
+      }
+    );
+
+  }
+
+
+  const lockButton =
+    document.getElementById(
+      'lockButton'
+    );
+
+
+  if (lockButton) {
+
+    lockButton.addEventListener(
+      'click',
+      function() {
+
+        toggleLock(
+          isOpen
+        );
+
+      }
+    );
+
+  }
+
+
+  const cancelButton =
+    document.getElementById(
+      'cancelBookButton'
+    );
+
+
+  if (cancelButton) {
+
+    cancelButton.addEventListener(
+      'click',
+      cancelBookAction
+    );
+
+  }
+
+
+  const archiveButton =
+    document.getElementById(
+      'archiveBookButton'
+    );
+
+
+  if (archiveButton) {
+
+    archiveButton.addEventListener(
+      'click',
+      archiveBookAction
+    );
+
+  }
+
+
+  const deleteFilesButton =
+    document.getElementById(
+      'deleteBookFilesButton'
+    );
+
+
+  if (deleteFilesButton) {
+
+    deleteFilesButton.addEventListener(
+      'click',
+      deleteBookAndFilesAction
+    );
+
+  }
+
+
+  document
+    .querySelectorAll(
+      '[data-delete-id]'
+    )
+    .forEach(
+      function(button) {
+
+        button.addEventListener(
+          'click',
+          function() {
+
+            deleteContribution(
+              button.dataset.deleteId
+            );
+
+          }
+        );
+
+      }
+    );
+
+}
+
+
+
+function openEditBook() {
+
+  if (!CURRENT_DATA) {
+
+    return;
+
+  }
+
+
+  const book =
+    CURRENT_DATA.book;
+
+
+  document.getElementById(
+    'editTitle'
+  ).value =
+    book.title || '';
+
+
+  document.getElementById(
+    'editOccasion'
+  ).value =
+    book.occasion || 'Birthday';
+
+
+  document.getElementById(
+    'editRecipientName'
+  ).value =
+    book.recipientName || '';
+
+
+  document.getElementById(
+    'editFormat'
+  ).value =
+    book.format || 'classic';
+
+
+  document.getElementById(
+    'editSendAt'
+  ).value =
+    isoToLocalInput(
+      book.sendAt
+    );
+
+
+  const emailContainer =
+    document.getElementById(
+      'editRecipientEmails'
+    );
+
+
+  emailContainer.innerHTML =
+    '';
+
+
+  const emails =
+    CURRENT_DATA.recipientEmails ||
+    [];
+
+
+  if (
+    emails.length
+  ) {
+
+    emails.forEach(
+      function(email) {
+
+        addEditEmailRow(
+          email
+        );
+
+      }
+    );
+
+  } else {
+
+    addEditEmailRow(
+      ''
+    );
+
+  }
+
+
+  document.getElementById(
+    'editBookResult'
+  ).innerHTML =
+    '';
+
+
+  document.getElementById(
+    'editBookModal'
+  ).style.display =
+    'flex';
+
+}
+
+
+
+function closeEditBook() {
+
+  document.getElementById(
+    'editBookModal'
+  ).style.display =
+    'none';
+
+}
+
+
+
+function addEditEmailRow(value) {
+
+  const container =
+    document.getElementById(
+      'editRecipientEmails'
+    );
+
+
+  const row =
+    document.createElement(
+      'div'
+    );
+
+
+  row.className =
+    'email-row';
+
+
+  row.innerHTML = `
+
+    <input
+      type="email"
+      class="edit-recipient-email"
+      placeholder="person@company.com"
+      value="${escapeHtml(
+        value || ''
+      )}">
+
+    <button
+      type="button"
+      class="remove-email-btn">
+
+      ×
+
+    </button>
+
+  `;
+
+
+  row
+    .querySelector(
+      '.remove-email-btn'
+    )
+    .addEventListener(
+      'click',
+      function() {
+
+        row.remove();
+
+
+        const remaining =
+          container.querySelectorAll(
+            '.email-row'
+          );
+
+
+        if (!remaining.length) {
+
+          addEditEmailRow(
+            ''
+          );
+
+        }
+
+      }
+    );
+
+
+  container.appendChild(
+    row
+  );
+
+}
+
+
+
+document
+  .getElementById(
+    'editBookForm'
+  )
+  .addEventListener(
+    'submit',
+    function(e) {
+
+      e.preventDefault();
+
+
+      const button =
+        document.getElementById(
+          'saveBookButton'
+        );
+
+
+      const emailInputs =
+        document.querySelectorAll(
+          '.edit-recipient-email'
+        );
+
+
+      const emails =
+        Array.from(
+          emailInputs
+        )
+          .map(
+            function(input) {
+
+              return input.value
+                .trim();
+
+            }
+          )
+          .filter(
+            function(value) {
+
+              return value;
+
+            }
+          );
+
+
+      if (!emails.length) {
+
+        alert(
+          'Please enter at least one recipient email.'
+        );
+
+        return;
+
+      }
+
+
+      for (
+        let i = 0;
+        i < emailInputs.length;
+        i++
+      ) {
+
+        if (
+          emailInputs[i].value.trim() &&
+          !emailInputs[i].checkValidity()
+        ) {
+
+          emailInputs[i]
+            .reportValidity();
+
+          return;
+
+        }
+
+      }
+
+
+      const localDate =
+        document.getElementById(
+          'editSendAt'
+        ).value;
+
+
+      if (!localDate) {
+
+        alert(
+          'Please select a delivery date.'
+        );
+
+        return;
+
+      }
+
+
+      const data = {
+
+        title:
+          document.getElementById(
+            'editTitle'
+          ).value,
+
+        occasion:
+          document.getElementById(
+            'editOccasion'
+          ).value,
+
+        recipientName:
+          document.getElementById(
+            'editRecipientName'
+          ).value,
+
+        recipientEmail:
+          Array.from(
+            new Set(
+              emails
+            )
+          ).join(','),
+
+        sendAt:
+          new Date(
+            localDate
+          ).toISOString(),
+
+        format:
+          document.getElementById(
+            'editFormat'
+          ).value
+
+      };
+
+
+      button.disabled =
+        true;
+
+
+      button.textContent =
+        'Saving...';
+
+
+      google.script.run
+
+        .withSuccessHandler(
+          function() {
+
+            button.disabled =
+              false;
+
+
+            button.textContent =
+              'Save changes';
+
+
+            closeEditBook();
+
+
+            load();
+
+          }
+        )
+
+        .withFailureHandler(
+          function(err) {
+
+            button.disabled =
+              false;
+
+
+            button.textContent =
+              'Save changes';
+
+
+            document.getElementById(
+              'editBookResult'
+            ).innerHTML = `
+
+              <div class="notice error">
+
+                ${escapeHtml(
+                  getErrorMessage(err)
+                )}
+
+              </div>
+
+            `;
+
+          }
+        )
+
+        .updateBookDetails(
+          BOOK,
+          TOKEN,
+          data
+        );
+
+    }
+  );
+
+
+
+function previewEmail() {
+
+  google.script.run
+
+    .withSuccessHandler(
+      function(preview) {
+
+        document.getElementById(
+          'previewSubject'
+        ).textContent =
+          preview.subject;
+
+
+        document.getElementById(
+          'previewRecipients'
+        ).textContent =
+          preview.recipientEmails.join(
+            ', '
+          );
+
+
+        document.getElementById(
+          'emailPreviewFrame'
+        ).srcdoc =
+          preview.html;
+
+
+        document.getElementById(
+          'emailPreviewModal'
+        ).style.display =
+          'flex';
+
+      }
+    )
+
+    .withFailureHandler(
+      function(err) {
+
+        alert(
+          getErrorMessage(err)
+        );
+
+      }
+    )
+
+    .getBookEmailPreview(
+      BOOK,
+      TOKEN
+    );
+
+}
+
+
+
+function closeEmailPreview() {
+
+  document.getElementById(
+    'emailPreviewModal'
+  ).style.display =
+    'none';
+
+}
+
+
+
+function sendTestEmail() {
+
+  const button =
+    document.getElementById(
+      'testFromPreviewButton'
+    );
+
+
+  if (button) {
+
+    button.disabled =
+      true;
+
+
+    button.textContent =
+      'Generating PDF...';
+
+  }
+
+
+  google.script.run
+
+    .withSuccessHandler(
+      function(result) {
+
+        if (button) {
+
+          button.disabled =
+            false;
+
+
+          button.textContent =
+            'Send test to myself';
+
+        }
+
+
+        alert(
+          'Test email with PDF sent to:\n' +
+          result.email
+        );
+
+      }
+    )
+
+    .withFailureHandler(
+      function(err) {
+
+        if (button) {
+
+          button.disabled =
+            false;
+
+
+          button.textContent =
+            'Send test to myself';
+
+        }
+
+
+        alert(
+          getErrorMessage(err)
+        );
+
+      }
+    )
+
+    .sendTestBookEmail(
+      BOOK,
+      TOKEN
+    );
+
+}
+
+
+
+function deleteContribution(id) {
+
+  if (
+    !confirm(
+      'Remove this contribution?\n\n' +
+      'Its uploaded media will also be moved to Trash.'
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  google.script.run
+
+    .withSuccessHandler(
+      load
+    )
+
+    .withFailureHandler(
+      function(err) {
+
+        alert(
+          getErrorMessage(err)
+        );
+
+      }
+    )
+
+    .deleteContribution(
+      BOOK,
+      TOKEN,
+      id
+    );
+
+}
+
+
+
+function toggleLock(currentlyOpen) {
+
+  google.script.run
+
+    .withSuccessHandler(
+      load
+    )
+
+    .withFailureHandler(
+      function(err) {
+
+        alert(
+          getErrorMessage(err)
+        );
+
+      }
+    )
+
+    .setBookLocked(
+      BOOK,
+      TOKEN,
+      currentlyOpen
+    );
+
+}
+
+
+
+function sendNow() {
+
+  const message =
+    CURRENT_DATA
+      ? 'Send this Celebration Book now to ' +
+        CURRENT_DATA.recipientEmails.length +
+        ' recipient' +
+        (
+          CURRENT_DATA.recipientEmails.length === 1
+            ? ''
+            : 's'
+        ) +
+        '?\n\nA PDF copy will also be attached.'
+      : 'Send this Celebration Book now?';
+
+
+  if (
+    !confirm(
+      message
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  google.script.run
+
+    .withSuccessHandler(
+      function() {
+
+        closeEmailPreview();
+
+
+        alert(
+          'Celebration Book and PDF sent successfully.'
+        );
+
+
+        load();
+
+      }
+    )
+
+    .withFailureHandler(
+      function(err) {
+
+        alert(
+          getErrorMessage(err)
+        );
+
+      }
+    )
+
+    .sendBookNow(
+      BOOK,
+      TOKEN
+    );
+
+}
+
+
+
+function cancelBookAction() {
+
+  const confirmed =
+    confirm(
+      'Cancel this Celebration Book?\n\n' +
+      'Contributions will close and scheduled delivery will stop.\n\n' +
+      'The Book and its Drive files will remain available.'
+    );
+
+
+  if (!confirmed) {
+
+    return;
+
+  }
+
+
+  google.script.run
+
+    .withSuccessHandler(
+      function() {
+
+        alert(
+          'The Celebration Book has been cancelled.'
+        );
+
+
+        load();
+
+      }
+    )
+
+    .withFailureHandler(
+      function(err) {
+
+        alert(
+          getErrorMessage(err)
+        );
+
+      }
+    )
+
+    .cancelBook(
+      BOOK,
+      TOKEN
+    );
+
+}
+
+
+
+function archiveBookAction() {
+
+  const confirmed =
+    confirm(
+      'Remove this Celebration Book from the app?\n\n' +
+      'The Book will disappear from My Books and Dashboard.\n\n' +
+      'IMPORTANT: The Drive folder, uploaded pictures, GIFs and generated Slides will be PRESERVED.'
+    );
+
+
+  if (!confirmed) {
+
+    return;
+
+  }
+
+
+  google.script.run
+
+    .withSuccessHandler(
+      function(result) {
+
+        if (
+          result.archiveFolderUrl
+        ) {
+
+          const openArchive =
+            confirm(
+              'Book removed from the app.\n\n' +
+              'Your Drive archive has been preserved.\n\n' +
+              'Would you like to open the archive folder now?'
+            );
+
+
+          if (openArchive) {
+
+            window.open(
+              result.archiveFolderUrl,
+              '_blank'
+            );
+
+          }
+
+        }
+
+
+        window.location.href =
+          result.myBooksUrl;
+
+      }
+    )
+
+    .withFailureHandler(
+      function(err) {
+
+        alert(
+          getErrorMessage(err)
+        );
+
+      }
+    )
+
+    .deleteBook(
+      BOOK,
+      TOKEN
+    );
+
+}
+
+
+
+function deleteBookAndFilesAction() {
+
+  if (
+    !confirm(
+      'Permanently delete this Celebration Book AND all stored files?\n\n' +
+      'This includes uploaded pictures, GIFs, generated Slides and the Drive folder.\n\n' +
+      'Use "Remove Book from App" instead if you want to keep the memories.'
+    )
+  ) {
+
+    return;
+
+  }
+
+
+  const confirmation =
+    prompt(
+      'Type DELETE FILES to permanently remove everything:'
+    );
+
+
+  if (
+    confirmation !== 'DELETE FILES'
+  ) {
+
+    alert(
+      'Deletion cancelled.'
+    );
+
+    return;
+
+  }
+
+
+  google.script.run
+
+    .withSuccessHandler(
+      function(result) {
+
+        window.location.href =
+          result.myBooksUrl;
+
+      }
+    )
+
+    .withFailureHandler(
+      function(err) {
+
+        alert(
+          getErrorMessage(err)
+        );
+
+      }
+    )
+
+    .deleteBookAndFiles(
+      BOOK,
+      TOKEN
+    );
+
+}
+
+
+
+function copyText(text) {
+
+  if (
+    navigator.clipboard &&
+    navigator.clipboard.writeText
+  ) {
+
+    navigator.clipboard
+      .writeText(
+        text
+      )
+      .then(
+        function() {
+
+          alert(
+            'Contribution link copied.'
+          );
+
+        }
+      );
+
+    return;
+
+  }
+
+
+  prompt(
+    'Copy this contribution link:',
+    text
+  );
+
+}
+
+
+
+function isoToLocalInput(value) {
+
+  if (!value) {
+
+    return '';
+
+  }
+
+
+  const date =
+    new Date(
+      value
+    );
+
+
+  const offset =
+    date.getTimezoneOffset();
+
+
+  const local =
+    new Date(
+      date.getTime() -
+      offset * 60000
+    );
+
+
+  return local
+    .toISOString()
+    .slice(
+      0,
+      16
+    );
+
+}
+
+
+
+function formatDate(value) {
+
+  if (!value) {
+
+    return '';
+
+  }
+
+
+  return new Date(
+    value
+  ).toLocaleString();
+
+}
+
+
+
+function getErrorMessage(err) {
+
+  if (!err) {
+
+    return 'An unexpected error occurred.';
+
+  }
+
+
+  if (
+    typeof err === 'string'
+  ) {
+
+    return err;
+
+  }
+
+
+  return (
+    err.message ||
+    'An unexpected error occurred.'
+  );
+
+}
+
+
+
+function escapeHtml(value) {
+
+  return String(
+    value || ''
+  ).replace(
+    /[&<>"']/g,
+    function(c) {
+
+      return {
+
+        '&':
+          '&amp;',
+
+        '<':
+          '&lt;',
+
+        '>':
+          '&gt;',
+
+        '"':
+          '&quot;',
+
+        "'":
+          '&#039;'
+
+      }[c];
+
+    }
+  );
+
+}
+
+
+
+load();
+
+</script>
+
+
+</body>
+
+</html>
