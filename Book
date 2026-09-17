@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html>
+<head><base target="_top"><?!= include('Styles'); ?>
+<style>
+/* ============ READER SHELL — light, airy, festive ============ */
+html,body{height:100%}
+body{
+  background:
+    radial-gradient(1200px 620px at 12% -8%,  rgba(255,255,255,.95), transparent 60%),
+    radial-gradient(1000px 560px at 92% 108%, rgba(255,255,255,.75), transparent 62%),
+    linear-gradient(158deg, var(--tsoft) 0%, #FFFFFF 46%, var(--tsoft) 100%);
+  min-height:100%;
+}
+.confetti-layer{
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  opacity:.5; background-repeat:repeat; background-size:auto 190px;
+}
+
+.reader{
+  position:relative; z-index:1;
+  display:flex; flex-direction:column; align-items:center;
+  padding:14px 16px 26px; min-height:100vh;
+}
+
+/* ---------- header ---------- */
+.rhead{
+  width:100%; max-width:1240px; display:flex; align-items:center; gap:14px;
+  margin-bottom:10px; flex-wrap:wrap;
+  background:rgba(255,255,255,.72); border:1px solid var(--tline);
+  border-radius:10px; padding:11px 16px;
+  box-shadow:0 2px 14px rgba(90,60,30,.07);
+  backdrop-filter:blur(6px);
+}
+.rhead .badge{
+  width:34px; height:34px; border-radius:8px; flex-shrink:0;
+  background:linear-gradient(140deg,var(--t1),var(--t2));
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-size:16px; box-shadow:0 3px 10px rgba(0,0,0,.13);
+}
+.rhead .t{font-weight:700; font-size:15.5px; color:var(--tink); letter-spacing:-.2px}
+.rhead .s{font-size:12.5px; color:var(--tmuted); margin-top:1px}
+.rhead .sp{flex:1}
+.rbtn{
+  padding:8px 14px; font-size:12.5px; font-weight:600; border-radius:7px;
+  background:#fff; color:var(--t2); border:1px solid var(--tline);
+  cursor:pointer; text-decoration:none; white-space:nowrap;
+  transition:background .12s, transform .12s;
+}
+.rbtn:hover{background:var(--tsoft); transform:translateY(-1px)}
+.rbtn.solid{background:linear-gradient(140deg,var(--t1),var(--t2)); color:#fff; border-color:transparent}
+.rbtn.solid:hover{filter:brightness(1.06)}
+
+/* ---------- book stage ---------- */
+.stage{perspective:3000px; margin:4px auto 0; position:relative}
+.stage:after{                       /* soft floor shadow */
+  content:''; position:absolute; left:6%; right:6%; bottom:-22px; height:34px;
+  background:radial-gradient(ellipse at center, rgba(90,60,30,.22), transparent 70%);
+  filter:blur(9px); z-index:-1;
+}
+.book{
+  position:relative; transform-style:preserve-3d;
+  box-shadow:0 34px 70px rgba(80,50,25,.24), 0 8px 22px rgba(80,50,25,.12);
+  border-radius:10px;
+}
+.book:before{
+  content:''; position:absolute; left:50%; top:0; bottom:0; width:18px; z-index:70;
+  transform:translateX(-50%);
+  background:linear-gradient(90deg,rgba(0,0,0,.08),rgba(255,255,255,.32) 48%,rgba(0,0,0,.08));
+  pointer-events:none;
+}
+.pg{
+  position:absolute; inset:0; background:transparent;
+  transition:opacity .28s ease, transform .28s ease;
+  overflow:visible;
+}
+.pg.flipped{opacity:0; transform:translateX(-18px); pointer-events:none}
+.pg.hidden-next{opacity:0; transform:translateX(18px); pointer-events:none}
+.spread{position:absolute; inset:0; display:flex; flex-direction:row; direction:ltr; gap:0; width:100%; height:100%}
+.single-page .spread{justify-content:center}
+.single-page .leaf{width:100%; flex:0 0 100%; border-radius:10px !important; border:1px solid var(--tline) !important}
+.leaf{position:relative; overflow:hidden; background:var(--tpaper); border:1px solid var(--tline); width:50%; height:100%; flex:0 0 50%}
+.leaf.left{border-radius:10px 0 0 10px; border-right:none; order:1}
+.leaf.right{border-radius:0 10px 10px 0; border-left:none; order:2}
+.leaf .pgin{position:absolute; inset:0; z-index:1; display:flex; flex-direction:column; padding:7% 7.5%}
+.leaf .pgbg{position:absolute; inset:0; z-index:0}
+.leaf .pgbg.photo{background-size:cover; background-position:center}
+.leaf .pgbg.photo:after{content:''; position:absolute; inset:0; background:rgba(255,255,255,.8)}
+
+/* ---------- cover ---------- */
+.coverleaf{background:linear-gradient(152deg,var(--t1) 0%,var(--t2) 100%); color:#fff; border:none; font-family:Georgia,'Times New Roman',serif}
+.inside-cover{background:linear-gradient(152deg,var(--tsoft),var(--tpaper))}
+.coverleaf .sheen{position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:linear-gradient(118deg,rgba(255,255,255,.2) 0%,rgba(255,255,255,0) 44%)}
+.coverleaf .ribbon{
+  position:absolute; top:0; right:11%; width:11%; height:23%; z-index:5;
+  background:linear-gradient(180deg,#F5D678,#D9A82E);
+  box-shadow:0 3px 12px rgba(0,0,0,.22);
+}
+.coverleaf .ribbon:after{
+  content:''; position:absolute; bottom:-1px; left:0; right:0; height:16%;
+  background:var(--t2);
+  clip-path:polygon(0 0, 100% 0, 100% 100%, 50% 58%, 0 100%);
+}
+.coverleaf .frame{position:absolute; inset:5.5%; z-index:2; pointer-events:none;
+  border:1.5px solid rgba(255,255,255,.52); border-radius:2px}
+.coverleaf .frame:before{content:''; position:absolute; inset:7px;
+  border:.75px solid rgba(255,255,255,.34); border-radius:2px}
+.coverleaf .orn{position:absolute; z-index:3; font-size:.85em; color:rgba(255,255,255,.68)}
+.coverleaf .orn.tl{top:6.6%; left:6.6%} .coverleaf .orn.tr{top:6.6%; right:6.6%}
+.coverleaf .orn.bl{bottom:6.6%; left:6.6%} .coverleaf .orn.br{bottom:6.6%; right:6.6%}
+.coverleaf .pgin{align-items:center; justify-content:center; text-align:center; z-index:4; padding:14% 12%}
+.coverleaf .cimg{width:43%; aspect-ratio:1; border-radius:50%; object-fit:cover;
+  border:4px solid rgba(255,255,255,.8); margin-bottom:1.1em;
+  box-shadow:0 14px 38px rgba(0,0,0,.32), 0 0 0 10px rgba(255,255,255,.17)}
+.coverleaf .occ{font-size:1.4em; font-weight:400; letter-spacing:.3em; text-transform:uppercase;
+  opacity:.95; margin-bottom:.15em; font-family:"Segoe UI",Helvetica,Arial,sans-serif}
+.coverleaf .flour{display:flex; align-items:center; justify-content:center; gap:11px;
+  margin:.8em 0 .9em; font-size:.78em; color:rgba(255,255,255,.85)}
+.coverleaf .flour i{display:block; width:44px; height:1px; background:rgba(255,255,255,.62)}
+.coverleaf .hon{font-size:3.3em; font-weight:700; line-height:1.1; margin-bottom:.4em;
+  text-shadow:0 3px 18px rgba(0,0,0,.3)}
+.coverleaf .cmsg{font-size:1.2em; opacity:.94; font-style:italic; line-height:1.55}
+.coverleaf .foot{position:absolute; bottom:10.5%; left:0; right:0; z-index:4; text-align:center;
+  font-size:.9em; letter-spacing:.17em; text-transform:uppercase; color:rgba(255,255,255,.62);
+  font-family:"Segoe UI",Helvetica,Arial,sans-serif}
+
+/* ---------- contribution spreads ---------- */
+.panelp{background:rgba(255,255,255,.94); border-radius:14px; padding:7% 7.5%; display:flex; flex-direction:column; flex:1; box-shadow:0 3px 20px rgba(90,50,20,.1); border:1px solid rgba(255,255,255,.95)}
+.photo-panel{align-items:center; justify-content:center; padding:5.5%}
+.photo-panel .photo-img{width:100%; height:100%; max-width:100%; max-height:100%; object-fit:contain; object-position:center; border-radius:10px; box-shadow:0 9px 24px rgba(0,0,0,.17); border:3px solid #fff; background:#fff}
+.no-photo{align-items:center; justify-content:center; text-align:center; color:var(--tmuted)}
+.no-photo .initial{width:34%; aspect-ratio:1; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--tsoft); color:var(--t2); font:700 3.4em Georgia,serif; border:2px solid var(--tline)}
+.no-photo .cap{margin-top:1em; font-size:1em; font-style:italic}
+.msg-panel{padding:8% 8.5% 7%}
+.msg-panel .body{flex:1 1 auto; min-height:0; font-size:1.16em; line-height:1.62; white-space:pre-wrap; overflow:hidden; color:var(--tink)}
+.msg-panel .cont{font-size:.78em; text-transform:uppercase; letter-spacing:.12em; color:var(--tmuted); margin-bottom:4%; font-family:"Segoe UI",Helvetica,Arial,sans-serif; flex-shrink:0}
+.msg-panel .sign{margin-top:auto; padding-top:4%; border-top:1.5px solid var(--tline); font-size:1.34em; font-weight:650; color:var(--t2); text-align:right; flex:0 0 auto; font-family:Georgia,serif; font-style:italic; min-height:2.2em}
+.spread-label{position:absolute; bottom:2.4%; left:0; right:0; text-align:center; font-size:.68em; letter-spacing:.12em; text-transform:uppercase; color:var(--tmuted); z-index:3}
+
+/* ---------- closing page ---------- */
+.endp{background:linear-gradient(152deg,var(--tsoft),var(--tpaper))}
+.endp .pgin{align-items:center; justify-content:center; text-align:center}
+.endp .tx{font-size:1.7em; color:var(--t2); font-weight:650; line-height:1.42; font-family:Georgia,serif}
+.endp .sm{font-size:1.1em; color:var(--tmuted); margin-top:1em; line-height:1.55; font-style:italic}
+.endp .flour2{display:flex; align-items:center; justify-content:center; gap:11px;
+  margin-top:1.3em; font-size:.85em; color:var(--t1)}
+.endp .flour2 i{display:block; width:46px; height:1px; background:var(--tline)}
+
+/* ---------- controls ---------- */
+.ctrl{display:flex; align-items:center; gap:16px; margin-top:26px}
+.nav{
+  width:50px; height:50px; border-radius:50%; border:1px solid var(--tline);
+  cursor:pointer; background:#fff; color:var(--t2); font-size:20px; font-weight:600;
+  box-shadow:0 4px 14px rgba(90,60,30,.14); transition:.14s;
+}
+.nav:hover:not(:disabled){background:var(--tsoft); transform:scale(1.07)}
+.nav:disabled{opacity:.34; cursor:not-allowed}
+.pno{
+  font-size:13px; color:var(--tink); min-width:118px; text-align:center; font-weight:600;
+  background:rgba(255,255,255,.8); border:1px solid var(--tline);
+  border-radius:100px; padding:7px 15px;
+}
+.tip{font-size:12px; color:var(--tmuted); margin-top:13px}
+
+/* ---------- thumbnail strip ---------- */
+.strip{
+  display:flex; gap:7px; margin-top:16px; flex-wrap:wrap;
+  justify-content:center; max-width:760px;
+}
+.thumb{
+  width:26px; height:34px; border-radius:3px; cursor:pointer;
+  border:1.5px solid var(--tline); background:var(--tpaper);
+  transition:.12s; position:relative; overflow:hidden;
+}
+.thumb:hover{transform:translateY(-2px); border-color:var(--t1)}
+.thumb.on{border-color:var(--t2); box-shadow:0 0 0 2px var(--tsoft)}
+.thumb.cv{background:linear-gradient(150deg,var(--t1),var(--t2))}
+.thumb.en{background:var(--tsoft)}
+
+/* ---------- recipient thank-you ---------- */
+.ty-overlay{position:fixed;inset:0;z-index:300;background:rgba(19,31,48,.58);display:flex;align-items:center;justify-content:center;padding:20px}
+.ty-dialog{width:min(560px,95vw);background:#fff;border:1px solid var(--tline);border-radius:12px;box-shadow:0 22px 70px rgba(0,0,0,.28);padding:24px}
+.ty-dialog h2{margin:0 0 8px;color:var(--t2)}
+.ty-dialog textarea{width:100%;min-height:130px;margin:12px 0 14px;padding:11px 12px;border:1px solid var(--tline);border-radius:7px;font:14px/1.5 "Segoe UI",Arial,sans-serif;resize:vertical}
+.ty-actions{display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap}
+
+@media(max-width:820px){
+  .rhead{padding:9px 12px}
+  .rhead .t{font-size:14px}
+  .strip{display:none}
+}
+</style>
+</head>
+<body data-theme="sunset">
+
+<div class="confetti-layer" id="confetti"></div>
+
+<div id="loading" class="loading" style="position:relative;z-index:1">
+  <div class="spin"></div><div>Opening the book…</div>
+</div>
+
+<div id="reader" class="reader hidden">
+  <div class="rhead">
+    <div class="badge">✦</div>
+    <div>
+      <div class="t" id="rTitle"></div>
+      <div class="s" id="rSub"></div><div class="s" style="font-size:9px;opacity:.45">v6.10</div>
+    </div>
+    <div class="sp"></div>
+    <button class="rbtn" id="btnFull">Fullscreen</button>
+    <button class="rbtn" id="restart">Start again</button>
+    <button class="rbtn solid hidden" id="thankBtn">Say thank you</button>
+    <a class="rbtn solid" id="homeLink">My books</a>
+  </div>
+
+  <div class="stage" id="stage"><div class="book" id="book"></div></div>
+
+  <div class="ctrl">
+    <button class="nav" id="prev">‹</button>
+    <div class="pno" id="pno"></div>
+    <button class="nav" id="next">›</button>
+  </div>
+
+  <div class="strip" id="strip"></div>
+  <div class="tip">Each contribution: picture on the left page, message and name on the right page</div>
+</div>
+
+<div id="thankModal" class="ty-overlay hidden" aria-hidden="true">
+  <div class="ty-dialog">
+    <h2>Thank the contributors</h2>
+    <div class="s">Your message will be emailed to all contributors using BCC, so their email addresses stay private.</div>
+    <textarea id="thankText" maxlength="800" placeholder="Write a short thank-you message"></textarea>
+    <div id="thankMsg"></div>
+    <div class="ty-actions">
+      <button class="rbtn" id="thankCancel" type="button">Cancel</button>
+      <button class="rbtn solid" id="thankSend" type="button">Send thank you</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var BOOK_ID = '<?= bookId ?>';
+var AUTO_THANK = /(?:^|[?&])thank=1(?:&|$)/.test(window.location.search);
+var B = null, leaves = [], cur = 0;
+
+function imgTag(url,id,cls,isGif){
+  if(!url) return '';
+  return '<img class="'+cls+'" src="'+url+'" data-fid="'+(id||'')+'"'+(isGif?' data-gif="1"':'')+' onerror="imgFallback(this)">';
+}
+function hydrateGifs(){
+  Array.prototype.forEach.call(document.querySelectorAll('img[data-gif="1"]'), function(el){
+    var fid = el.getAttribute('data-fid');
+    if(!fid || el.getAttribute('data-gif-loaded')) return;
+    el.setAttribute('data-gif-loaded','1');
+    srv('apiGetImageData', fid).then(function(d){ if(d) el.src=d; }).catch(function(){});
+  });
+}
+function imgFallback(el){
+  var fid = el.getAttribute('data-fid');
+  if(!fid || el.getAttribute('data-tried')){ el.style.display='none'; return; }
+  el.setAttribute('data-tried','1');
+  google.script.run.withSuccessHandler(function(d){
+    if(d) el.src = d; else el.style.display='none';
+  }).withFailureHandler(function(){ el.style.display='none'; }).apiGetImageData(fid);
+}
+
+/* Fill the viewport far more generously than before. */
+function sizeBook(){
+  var head = document.querySelector('.rhead');
+  var headH = head ? head.offsetHeight : 60;
+  var chrome = headH + 190;
+  var h = Math.max(360, window.innerHeight - chrome);
+  var pageW = h * (8.5/11);
+
+  var current = leaves && leaves.length ? leaves[cur] : null;
+  var single = current && current.classList.contains('single-page');
+  var w = single ? pageW : pageW * 2;
+
+  var maxW = Math.min(window.innerWidth - 40, single ? 760 : 1480);
+  if(w > maxW){
+    w = maxW;
+    pageW = single ? w : w/2;
+    h = pageW * (11/8.5);
+  }
+
+  var st = document.getElementById('stage'), bk = document.getElementById('book');
+  st.style.width = w+'px'; st.style.height = h+'px';
+  bk.style.width = w+'px'; bk.style.height = h+'px';
+  bk.style.fontSize = (pageW/32) + 'px';
+}
+
+function pageBg(){
+  if(B.bgImageUrl) return '<div class="pgbg photo" style="background-image:url(\''+B.bgImageUrl+'\')"></div>';
+  var p = festivePattern(B.bgStyle||'confetti', B.theme||'sunset', .42);
+  if(p === 'none') return '';
+  return '<div class="pgbg" data-pat="1"></div>';
+}
+
+function build(){
+  var th = B.theme || 'sunset';
+  document.body.setAttribute('data-theme', th);
+  applyPattern(document.getElementById('confetti'), 'confetti', th, .3);
+  document.getElementById('rTitle').textContent = B.occasion + ' — ' + B.honouree;
+  document.getElementById('rSub').textContent = B.coverMessage || 'A PD Celebration Book';
+  document.getElementById('homeLink').href = B.homeUrl;
+  var tb = document.getElementById('thankBtn');
+  if(B.canThank){
+    tb.classList.remove('hidden');
+    tb.disabled = !!B.thankYouSent;
+    tb.textContent = B.thankYouSent ? 'Thank you sent' : 'Say thank you';
+    document.getElementById('thankText').value = B.thankYouDefault || '';
+  } else {
+    tb.classList.add('hidden');
+  }
+
+  function bgHtml(){
+    if(B.bgImageUrl) return '<div class="pgbg photo" style="background-image:url(\''+B.bgImageUrl+'\')"></div>';
+    return '<div class="pgbg" data-pat="1"></div>';
+  }
+  function splitMessage(msg, maxChars){
+    var text = String(msg||'').trim();
+    if(!text) return [''];
+    var out = [];
+    while(text.length > maxChars){
+      var cut = text.lastIndexOf('\n', maxChars);
+      if(cut < Math.floor(maxChars*.58)) cut = text.lastIndexOf(' ', maxChars);
+      if(cut < Math.floor(maxChars*.58)) cut = maxChars;
+      out.push(text.substring(0,cut).trim());
+      text = text.substring(cut).trim();
+    }
+    if(text || !out.length) out.push(text);
+    return out;
+  }
+  function leftPhoto(p){
+    var inner = p.imageUrl
+      ? '<div class="panelp photo-panel">'+imgTag(p.imageUrl,p.imageId,'photo-img',p.imageMime==='image/gif')+'</div>'
+      : '<div class="panelp no-photo"><div class="initial">'+esc((p.authorName||'?').charAt(0).toUpperCase())+'</div><div class="cap">A message from '+esc(p.authorName)+'</div></div>';
+    return '<div class="leaf left">'+bgHtml()+'<div class="pgin">'+inner+'</div></div>';
+  }
+  function rightMessage(p, chunk, idx, total){
+    var last = idx === total-1;
+    return '<div class="leaf right">'+bgHtml()+'<div class="pgin"><div class="panelp msg-panel">'+
+      (idx ? '<div class="cont">'+esc(p.authorName)+' — continued</div>' : '')+
+      '<div class="body">'+esc(chunk)+'</div>'+
+      (last ? '<div class="sign">— '+esc(p.authorName)+'</div>' : '')+
+      '</div></div></div>';
+  }
+
+  var html = '';
+
+  /* Cover: a single standalone front cover. */
+  html += '<div class="pg single-page"><div class="spread">'+
+    '<div class="leaf coverleaf"><div class="pgbg" data-cover="1"></div><div class="sheen"></div><div class="ribbon"></div><div class="frame"></div>'+
+      '<div class="orn tl">❖</div><div class="orn tr">❖</div><div class="orn bl">❖</div><div class="orn br">❖</div>'+
+      '<div class="pgin">'+imgTag(B.coverImageUrl,'','cimg')+'<div class="occ">'+esc(B.occasion)+'</div><div class="flour"><i></i>❖<i></i></div><div class="hon">'+esc(B.honouree)+'</div>'+
+      (B.coverMessage?'<div class="cmsg">'+esc(B.coverMessage)+'</div>':'')+'</div><div class="foot">A PD Celebration Book</div></div>'+
+    '</div></div>';
+
+  /* One visible spread per contribution: photo on the left, message + name on the right. */
+  B.pages.forEach(function(p){
+    var chunks = splitMessage(p.message, 520);
+    chunks.forEach(function(chunk, idx){
+      html += '<div class="pg"><div class="spread">'+
+        (idx===0 ? leftPhoto(p) : '<div class="leaf left">'+bgHtml()+'<div class="pgin"><div class="panelp no-photo"><div class="initial">'+esc((p.authorName||'?').charAt(0).toUpperCase())+'</div><div class="cap">'+esc(p.authorName)+' — continued</div></div></div></div>')+
+        rightMessage(p,chunk,idx,chunks.length)+
+        '</div></div>';
+    });
+  });
+
+  /* Closing spread */
+  html += '<div class="pg"><div class="spread">'+
+    '<div class="leaf left endp">'+bgHtml()+'<div class="pgin"><div class="tx">Thank you for being part of this celebration</div><div class="flour2"><i></i>❖<i></i></div></div></div>'+
+    '<div class="leaf right endp">'+bgHtml()+'<div class="pgin"><div class="tx">With warm wishes<br>from all of us</div><div class="sm">'+esc(B.honouree)+'</div><div class="flour2"><i></i>❖<i></i></div></div></div>'+
+    '</div></div>';
+
+  var bk = document.getElementById('book');
+  bk.innerHTML = html;
+  Array.prototype.forEach.call(bk.querySelectorAll('.pgbg[data-pat]'), function(el){ applyPattern(el, B.bgStyle||'confetti', th, .42); });
+  var cv = bk.querySelector('.pgbg[data-cover]');
+  if(cv){ applyPattern(cv, B.bgStyle||'confetti', th, .18); cv.style.opacity='.55'; }
+  hydrateGifs();
+
+  leaves = Array.prototype.slice.call(bk.querySelectorAll('.pg'));
+  leaves.forEach(function(el,i){ el.style.zIndex = leaves.length - i; });
+  buildStrip(); cur = 0; sizeBook(); update();
+}
+
+function buildStrip(){
+  var s = document.getElementById('strip');
+  var html = '';
+  for(var i=0; i<leaves.length; i++){
+    var cls = 'thumb' + (i===0?' cv':'') + (i===leaves.length-1?' en':'');
+    var lbl = i===0 ? 'Cover' : (i===leaves.length-1 ? 'End' : 'Page '+i);
+    html += '<div class="'+cls+'" data-i="'+i+'" title="'+lbl+'"></div>';
+  }
+  s.innerHTML = html;
+  Array.prototype.forEach.call(s.querySelectorAll('.thumb'), function(el){
+    el.onclick = function(){ cur = parseInt(el.getAttribute('data-i'),10); update(); };
+  });
+}
+
+function update(){
+  leaves.forEach(function(el,i){
+    el.classList.remove('flipped','hidden-next');
+    if(i < cur) el.classList.add('flipped');
+    else if(i > cur) el.classList.add('hidden-next');
+    el.style.zIndex = (i===cur ? leaves.length+2 : leaves.length-i);
+  });
+  document.getElementById('prev').disabled = (cur === 0);
+  document.getElementById('next').disabled = (cur >= leaves.length-1);
+  document.getElementById('pno').textContent = cur===0 ? 'Cover' : (cur===leaves.length-1 ? 'The end' : 'Spread ' + cur);
+  Array.prototype.forEach.call(document.querySelectorAll('.thumb'), function(el){ el.classList.toggle('on', parseInt(el.getAttribute('data-i'),10) === cur); });
+  sizeBook();
+}
+
+function go(d){ var n = cur+d; if(n<0||n>leaves.length-1) return; cur = n; update(); }
+
+document.getElementById('next').onclick = function(){ go(1); };
+document.getElementById('prev').onclick = function(){ go(-1); };
+document.getElementById('restart').onclick = function(){ cur=0; update(); };
+
+document.getElementById('btnFull').onclick = function(){
+  var el = document.documentElement;
+  if(!document.fullscreenElement){
+    if(el.requestFullscreen) el.requestFullscreen();
+    this.textContent = 'Exit fullscreen';
+  } else {
+    if(document.exitFullscreen) document.exitFullscreen();
+    this.textContent = 'Fullscreen';
+  }
+  setTimeout(sizeBook, 260);
+};
+document.addEventListener('fullscreenchange', function(){
+  document.getElementById('btnFull').textContent =
+    document.fullscreenElement ? 'Exit fullscreen' : 'Fullscreen';
+  setTimeout(sizeBook, 120);
+});
+
+document.getElementById('thankBtn').onclick = function(){
+  if(this.disabled) return;
+  document.getElementById('thankMsg').innerHTML='';
+  var m=document.getElementById('thankModal'); m.classList.remove('hidden'); m.setAttribute('aria-hidden','false');
+};
+document.getElementById('thankCancel').onclick = function(){
+  var m=document.getElementById('thankModal'); m.classList.add('hidden'); m.setAttribute('aria-hidden','true');
+};
+document.getElementById('thankModal').onclick = function(e){ if(e.target===this) document.getElementById('thankCancel').click(); };
+document.getElementById('thankSend').onclick = function(){
+  var txt=document.getElementById('thankText').value.trim();
+  if(!txt){ document.getElementById('thankMsg').innerHTML='<div class="note err">Please write a thank-you message.</div>'; return; }
+  var b=this; b.disabled=true; b.textContent='Sending…';
+  srv('apiSendThankYou', BOOK_ID, txt).then(function(r){
+    b.disabled=false; b.textContent='Send thank you';
+    document.getElementById('thankMsg').innerHTML='<div class="note ok">Thank you sent to '+r.sent+' contributor'+(r.sent===1?'':'s')+'.</div>';
+    B.thankYouSent=true;
+    var tb=document.getElementById('thankBtn'); tb.disabled=true; tb.textContent='Thank you sent';
+    setTimeout(function(){ document.getElementById('thankCancel').click(); },1400);
+  }).catch(function(e){
+    b.disabled=false; b.textContent='Send thank you';
+    document.getElementById('thankMsg').innerHTML='<div class="note err">'+esc(e.message||'Could not send the thank-you.')+'</div>';
+  });
+};
+
+document.addEventListener('keydown', function(e){
+  if(e.key==='ArrowRight') go(1);
+  if(e.key==='ArrowLeft')  go(-1);
+  if(e.key==='Home'){ cur=0; update(); }
+  if(e.key==='End'){ cur=leaves.length-1; update(); }
+});
+var tx=0;
+document.addEventListener('touchstart', function(e){ tx = e.changedTouches[0].clientX; });
+document.addEventListener('touchend', function(e){
+  var dx = e.changedTouches[0].clientX - tx;
+  if(Math.abs(dx) > 55) go(dx<0?1:-1);
+});
+window.addEventListener('resize', sizeBook);
+
+(function init(){
+  if(!BOOK_ID){
+    document.getElementById('loading').innerHTML = '<div class="note err">No book specified.</div>';
+    return;
+  }
+  srv('apiGetBook', BOOK_ID).then(function(r){
+    B = r;
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('reader').classList.remove('hidden');
+    build();
+    if(AUTO_THANK && B.canThank && !B.thankYouSent){
+      setTimeout(function(){ document.getElementById('thankBtn').click(); }, 250);
+    }
+  }).catch(function(e){
+    document.getElementById('loading').innerHTML =
+      '<div class="note err">'+esc(e.message||'This book could not be opened.')+'</div>';
+  });
+})();
+</script>
+</body>
+</html>
