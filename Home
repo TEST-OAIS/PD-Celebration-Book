@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head><base target="_top"><?!= include('Styles'); ?></head>
+<body>
+
+<div class="topbar"><div class="topbar-in">
+  <a class="logo" href="#" id="logoLink">
+    <div class="mk">PD</div>
+    <div class="nm">Celebration Book</div>
+  </a>
+  <div class="sp"></div>
+  <div class="who" id="who"></div>
+</div></div>
+
+<div class="page">
+  <div id="loading" class="loading"><div class="spin"></div><div>Loading your books…</div></div>
+
+  <div id="main" class="hidden">
+    <div class="head">
+      <div class="sp">
+        <h1>My celebration books</h1>
+        <p class="lede">Create a book, collect messages from colleagues, and deliver it on the day.</p>
+      </div>
+      <a class="btn lg" id="newBtn">New book</a>
+    </div>
+
+    <div id="msg"></div>
+
+    <div class="panel">
+      <div class="panel-h">
+        <h2>Books I manage</h2>
+        <div class="sp"></div>
+        <span class="pill plain" id="mCount"></span>
+      </div>
+      <div class="panel-b tight" id="managed"></div>
+    </div>
+
+    <div class="panel" id="contribPanel">
+      <div class="panel-h">
+        <h2>Books I can contribute to</h2>
+        <div class="sp"></div>
+        <span class="pill plain" id="cCount"></span>
+      </div>
+      <div class="panel-b tight" id="contributing"></div>
+    </div>
+
+    <p class="help" id="retention"></p>
+  </div>
+</div>
+
+<script>
+var D = null;
+
+function rowManaged(b){
+  return '<tr>'+
+    '<td><span class="ttl">'+esc(b.occasion)+'</span>'+ 
+        '<span class="sub">'+esc(b.honouree)+'</span></td>'+ 
+    '<td>'+statusPill(b.status)+'</td>'+ 
+    '<td class="num">'+esc(fmtDate(b.deadline))+'</td>'+ 
+    '<td class="num">'+b.count+'</td>'+ 
+    '<td><span class="role">'+(b.role==='owner'?'Owner':'Deputy')+'</span></td>'+ 
+    '<td class="acts">'+ 
+      '<button class="btn sec sm" onclick="copyLink(\''+b.bookId+'\',this)">Contributor Link</button>'+ 
+      '<a class="btn sec sm" href="'+b.links.book+'" target="_blank">Preview</a>'+ 
+      '<a class="btn sm" href="'+b.links.manage+'">Manage</a>'+ 
+    '</td></tr>';
+}
+
+function rowContrib(b){
+  var act = (b.status==='open'||b.status==='closing')
+    ? '<a class="btn sm" href="'+b.links.contribute+'" target="_top">Edit my page</a>'
+    : '<a class="btn sec sm" href="'+b.links.book+'" target="_blank">View book</a>';
+  return '<tr>'+ 
+    '<td><span class="ttl">'+esc(b.occasion)+'</span>'+ 
+        '<span class="sub">'+esc(b.honouree)+'</span></td>'+ 
+    '<td>'+statusPill(b.status)+'</td>'+ 
+    '<td class="num">'+esc(fmtDate(b.deadline))+'</td>'+ 
+    '<td><span class="sub">'+esc(b.ownerName||b.ownerEmail)+'</span></td>'+ 
+    '<td><span class="role">Contributed</span></td>'+ 
+    '<td class="acts">'+act+'</td></tr>';
+}
+
+function copyLink(id, btn){
+  var b = null;
+  for(var i=0;i<D.managed.length;i++){ if(D.managed[i].bookId===id) b=D.managed[i]; }
+  if(!b) return;
+  var t = document.createElement('textarea');
+  t.value = b.links.contribute;
+  t.style.position='fixed'; t.style.opacity='0';
+  document.body.appendChild(t); t.select();
+  document.execCommand('copy'); document.body.removeChild(t);
+  var o = btn.textContent; btn.textContent='Copied';
+  setTimeout(function(){ btn.textContent=o; },1400);
+}
+
+function render(){
+  document.getElementById('who').textContent = D.email;
+  document.getElementById('newBtn').href = D.createUrl;
+  document.getElementById('logoLink').href = D.createUrl.replace('?page=create','');
+
+  document.getElementById('mCount').textContent =
+    D.managed.length + (D.managed.length===1?' book':' books');
+  document.getElementById('cCount').textContent =
+    D.contributing.length + (D.contributing.length===1?' book':' books');
+
+  var m = document.getElementById('managed');
+  if(!D.managed.length){
+    m.innerHTML = '<div class="empty"><div class="t">No books yet</div>'+ 
+      '<div class="d">Create your first celebration book to start collecting messages.</div>'+ 
+      '<a class="btn" href="'+D.createUrl+'">New book</a></div>';
+  } else {
+    m.innerHTML = '<table class="tbl"><thead><tr>'+ 
+      '<th>Occasion</th><th>Status</th><th>Delivery</th><th>Pages</th><th>Role</th><th></th>'+ 
+      '</tr></thead><tbody>'+D.managed.map(rowManaged).join('')+'</tbody></table>';
+  }
+
+  var c = document.getElementById('contributing');
+  if(!D.contributing.length){
+    document.getElementById('contribPanel').classList.add('hidden');
+  } else {
+    c.innerHTML = '<table class="tbl"><thead><tr>'+ 
+      '<th>Occasion</th><th>Status</th><th>Delivery</th><th>Organised by</th><th></th><th></th>'+ 
+      '</tr></thead><tbody>'+D.contributing.map(rowContrib).join('')+'</tbody></table>';
+  }
+
+  document.getElementById('retention').textContent =
+    'Books are permanently removed from the app ' + D.retentionDays +
+    ' days after their delivery date. Owners receive a reminder 3 days beforehand.';
+}
+
+srv('apiDashboard').then(function(r){
+  D = r;
+  document.getElementById('loading').classList.add('hidden');
+  document.getElementById('main').classList.remove('hidden');
+  render();
+}).catch(function(e){
+  document.getElementById('loading').innerHTML =
+    '<div class="note err">'+esc(e.message||'Could not load your books.')+'</div>';
+});
+</script>
+</body>
+</html>
