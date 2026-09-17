@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head><base target="_top"><?!= include('Styles'); ?><style>
+/* ===== contributor preview ===== */
+.pvback{position:fixed;inset:0;z-index:200;background:rgba(19,31,48,.66);display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto}
+.pvbox{width:min(1120px,96vw);background:#fff;border-radius:12px;box-shadow:0 24px 70px rgba(0,0,0,.28);overflow:hidden}
+.pvhead{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);background:#FBFCFE}
+.pvhead .t{font-size:15px;font-weight:700;color:var(--brand-dk)}
+.pvhead .sp{flex:1}
+.pvspread{display:flex;direction:ltr;width:100%;aspect-ratio:17/11;min-height:420px;background:var(--canvas);padding:22px}
+.pvpage{position:relative;width:50%;flex:0 0 50%;overflow:hidden;background:var(--tpaper,#FCFDFF);border:1px solid var(--tline,#CBD9EF)}
+.pvpage.left{border-radius:10px 0 0 10px;border-right:none}
+.pvpage.right{border-radius:0 10px 10px 0;border-left:none}
+.pvpage:after{content:'';position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 35px rgba(19,31,48,.035)}
+.pvbg{position:absolute;inset:0;opacity:.42;background-repeat:repeat;background-size:auto 150px}
+.pvin{position:absolute;inset:0;z-index:1;padding:7%;display:flex;flex-direction:column}
+.pvcard{background:rgba(255,255,255,.94);border:1px solid rgba(255,255,255,.98);border-radius:14px;box-shadow:0 3px 20px rgba(90,50,20,.09);flex:1;min-height:0;display:flex;flex-direction:column}
+.pvphoto{padding:5.5%;align-items:center;justify-content:center}
+.pvphoto img{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center;border-radius:10px;border:3px solid #fff;box-shadow:0 9px 24px rgba(0,0,0,.15);background:#fff}
+.pvempty{align-items:center;justify-content:center;text-align:center;color:var(--tmuted,#5E7291)}
+.pvempty .initial{width:34%;aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--tsoft,#E8EFFC);color:var(--t2,#0B41CD);font:700 56px Georgia,serif;border:2px solid var(--tline,#CBD9EF)}
+.pvempty .cap{margin-top:16px;font:italic 16px Georgia,serif}
+.pvmsg{padding:8% 8.5% 7%}
+.pvmsg .body{flex:1;min-height:0;overflow:auto;white-space:pre-wrap;color:var(--tink,#131F30);font:18px/1.62 Georgia,'Times New Roman',serif}
+.pvmsg .sign{margin-top:auto;padding-top:4%;border-top:1.5px solid var(--tline,#CBD9EF);font:italic 700 21px Georgia,serif;color:var(--t2,#0B41CD);text-align:right}
+.pvnote{padding:0 22px 18px;color:var(--muted);font-size:12.5px;text-align:center}
+@media(max-width:760px){.pvback{padding:10px}.pvspread{aspect-ratio:auto;min-height:0;display:block;padding:12px}.pvpage{width:100%;height:430px}.pvpage.left,.pvpage.right{border:1px solid var(--tline,#CBD9EF);border-radius:9px}.pvpage.right{margin-top:12px}.pvmsg .body{font-size:16px}.pvempty .initial{font-size:44px}}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="topbar-in">
+  <a class="logo" id="logoLink" href="#" target="_top"><div class="mk">PD</div><div class="nm">Celebration Book</div></a>
+</div></div>
+
+<div class="page-narrow">
+  <div id="loading" class="loading"><div class="spin"></div><div>Loading…</div></div>
+
+  <div id="main" class="hidden">
+    <div class="crumb"><a id="crumbHome" href="#" target="_top">My books</a> &rsaquo; Add my page</div>
+    <div class="head"><div class="sp">
+      <h1 id="hTitle"></h1><p class="lede" id="hSub"></p>
+    </div></div>
+
+    <div id="guidance"></div>
+    <div id="msg"></div>
+
+    <div id="closedBox" class="hidden">
+      <div class="note warn"><b>This book is closed.</b> Contributions are no longer accepted.</div>
+      <div class="btnrow">
+        <a class="btn" id="closedView" target="_blank">View the book</a>
+        <a class="btn sec" id="closedHome">Back to my books</a>
+      </div>
+    </div>
+
+    <div id="formBox">
+      <div class="panel">
+        <div class="panel-h"><h2>Your page</h2></div>
+        <div class="panel-b">
+          <div class="note info" style="font-size:13px">
+            You get <b>one full page</b>: your photo at the top, your message below, signed with your name.
+          </div>
+
+          <div class="field">
+            <label for="authorName">Your name</label>
+            <input type="text" id="authorName" maxlength="60" placeholder="As you would like it signed">
+            <div id="emoName"></div>
+          </div>
+
+          <div class="field">
+            <label for="message">Your message</label>
+            <textarea id="message" placeholder="A memory, a thank you, or your good wishes… 🎉"></textarea>
+            <div id="emoMsg"></div>
+            <div class="count" id="count">0 characters</div>
+            <div class="where">
+              <span class="lbl">Appears in</span>
+              <span class="tag on"><i>✓</i> Online book — your page</span>
+              <span class="tag on"><i>✓</i> PDF — your message card</span>
+            </div>
+          </div>
+
+          <div class="field" style="margin-bottom:0">
+            <label>Photo or GIF <span class="opt">— optional</span></label>
+            <div class="upload" id="imgUp">
+              <div class="t">Choose a photo or GIF</div>
+              <div class="d">JPG, PNG, WebP or animated GIF. GIFs can be up to 5 MB.</div>
+            </div>
+            <div class="where">
+              <span class="lbl">Appears in</span>
+              <span class="tag on"><i>✓</i> Online book — animated GIFs stay animated</span>
+              <span class="tag on"><i>✓</i> PDF — GIFs appear as a static image</span>
+              <span class="tag off"><i>✗</i> Not in the email</span>
+            </div>
+            <input type="file" id="imgFile" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden">
+            <img id="imgShot" class="shot hidden">
+            <div class="btnrow" style="margin-top:10px">
+              <button class="btn sec sm hidden" id="imgClear" type="button">Remove photo</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btnrow">
+        <button class="btn lg" id="saveBtn">Add my page</button>
+        <button class="btn sec lg" id="previewBtn" type="button">Preview contribution</button>
+        <button class="btn dgr lg hidden" id="delBtn">Delete my page</button>
+      </div>
+      <p class="help" id="editHint" style="margin-top:12px"></p>
+    </div>
+
+    <div id="doneBox" class="hidden">
+      <div class="note ok"><b>Your page has been added.</b> Thank you.</div>
+      <div class="panel"><div class="panel-b">
+        <p class="lede" style="margin-bottom:16px">
+          You can return to this link any time before the closing date to change or remove your page.
+        </p>
+        <div class="btnrow">
+          <a class="btn" id="doneView" target="_blank">See the book</a>
+          <button class="btn sec" id="doneEdit">Edit my page</button>
+          <a class="btn sec" id="doneHome">My books</a>
+        </div>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+<div id="previewBack" class="pvback hidden" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
+  <div class="pvbox" data-theme="roche" id="previewBox">
+    <div class="pvhead">
+      <div class="t" id="previewTitle">Preview contribution</div>
+      <div class="sp"></div>
+      <button type="button" class="btn sec sm" id="previewClose">Close preview</button>
+    </div>
+    <div class="pvspread">
+      <div class="pvpage left"><div class="pvbg" id="pvBgL"></div><div class="pvin"><div class="pvcard pvphoto" id="pvPhoto"></div></div></div>
+      <div class="pvpage right"><div class="pvbg" id="pvBgR"></div><div class="pvin"><div class="pvcard pvmsg"><div class="body" id="pvMessage"></div><div class="sign" id="pvName"></div></div></div></div>
+    </div>
+    <div class="pvnote">This preview shows how your contribution will appear in the online book. GIFs remain animated online.</div>
+  </div>
+</div>
+
+<script>
+var BOOK_ID = '<?= bookId ?>';
+var I = null, imgData = '', removeImg = false, MAXM = 1200;
+
+function updateCount(){
+  var n = document.getElementById('message').value.length;
+  var c = document.getElementById('count');
+  c.textContent = n + ' / ' + MAXM + ' characters';
+  c.className = 'count' + (n > MAXM ? ' over' : '');
+}
+
+function previewImageSrc(){
+  if(removeImg) return '';
+  if(imgData) return imgData;
+  var shot = document.getElementById('imgShot');
+  if(shot && !shot.classList.contains('hidden') && shot.src) return shot.src;
+  return (I && I.existing && I.existing.imageUrl) ? I.existing.imageUrl : '';
+}
+
+function openContributionPreview(){
+  var name = document.getElementById('authorName').value.trim();
+  var msg = document.getElementById('message').value.trim();
+  if(!name) return notice('msg','Please enter your name before previewing.','err');
+  if(!msg) return notice('msg','Please write your message before previewing.','err');
+  if(msg.length > MAXM) return notice('msg','Your message is too long to preview as a valid contribution.','err');
+
+  clearNotice('msg');
+  var box = document.getElementById('previewBox');
+  box.setAttribute('data-theme', (I && I.theme) || 'roche');
+  var pat = (I && I.bgStyle) || 'balloons';
+  applyPattern(document.getElementById('pvBgL'), pat, (I && I.theme) || 'roche', .28);
+  applyPattern(document.getElementById('pvBgR'), pat, (I && I.theme) || 'roche', .28);
+
+  var src = previewImageSrc();
+  var photo = document.getElementById('pvPhoto');
+  if(src){
+    photo.className = 'pvcard pvphoto';
+    photo.innerHTML = '<img src="'+esc(src)+'" alt="Contribution image">';
+  } else {
+    photo.className = 'pvcard pvempty';
+    photo.innerHTML = '<div class="initial">'+esc(name.charAt(0).toUpperCase()||'?')+'</div><div class="cap">A message from '+esc(name)+'</div>';
+  }
+  document.getElementById('pvMessage').textContent = msg;
+  document.getElementById('pvName').textContent = '— ' + name;
+  document.getElementById('previewBack').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeContributionPreview(){
+  document.getElementById('previewBack').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+function render(){
+  MAXM = I.maxMessage || 1200;
+  document.getElementById('logoLink').href = I.homeUrl;
+  document.getElementById('crumbHome').href = I.homeUrl;
+  document.getElementById('closedHome').href = I.homeUrl;
+  document.getElementById('doneHome').href = I.homeUrl;
+  document.getElementById('closedView').href = I.bookUrl;
+  document.getElementById('doneView').href = I.bookUrl;
+
+  document.getElementById('hTitle').textContent = I.occasion + ' — ' + I.honouree;
+  document.getElementById('hSub').innerHTML = I.closed
+    ? statusPill(I.cancelled ? 'cancelled' : 'closed')
+    : 'Contributions close ' + esc(fmtDateLong(I.deadline));
+
+  if(I.welcomeMessage){
+    document.getElementById('guidance').innerHTML =
+      '<div class="note info">'+esc(I.welcomeMessage).replace(/\n/g,'<br>')+'</div>';
+  }
+
+  if(I.closed){
+    document.getElementById('formBox').classList.add('hidden');
+    document.getElementById('closedBox').classList.remove('hidden');
+    return;
+  }
+
+  document.getElementById('authorName').value =
+    (I.existing && I.existing.authorName) || I.guessName || '';
+
+  if(I.existing){
+    document.getElementById('message').value = I.existing.message || '';
+    document.getElementById('saveBtn').textContent = 'Save changes';
+    document.getElementById('delBtn').classList.remove('hidden');
+    document.getElementById('editHint').textContent =
+      'You already have a page in this book. Saving will replace it.';
+    if(I.existing.imageUrl){
+      var s = document.getElementById('imgShot');
+      s.src = I.existing.imageUrl; s.classList.remove('hidden');
+      document.getElementById('imgClear').classList.remove('hidden');
+      if(I.existing.imageIsGif && I.existing.imageId){
+        google.script.run.withSuccessHandler(function(d){ if(d) s.src=d; })
+          .withFailureHandler(function(){})
+          .apiGetImageData(I.existing.imageId);
+      }
+    }
+  } else {
+    document.getElementById('editHint').textContent =
+      'You can edit or delete your page any time before the closing date.';
+  }
+  updateCount();
+}
+
+document.getElementById('message').addEventListener('input', updateCount);
+
+document.getElementById('imgUp').onclick = function(){ document.getElementById('imgFile').click(); };
+function readDataUrl(file){
+  return new Promise(function(resolve,reject){
+    var r = new FileReader();
+    r.onload = function(ev){ resolve(ev.target.result); };
+    r.onerror = function(){ reject(new Error('That file could not be read.')); };
+    r.readAsDataURL(file);
+  });
+}
+
+function isGifFile(file){
+  return !!file && (String(file.type).toLowerCase()==='image/gif' || /\.gif$/i.test(file.name||''));
+}
+
+document.getElementById('imgFile').onchange = function(e){
+  var f = e.target.files[0]; if(!f) return;
+  var job;
+  if(isGifFile(f)){
+    if(f.size > 5*1024*1024){
+      document.getElementById('imgFile').value='';
+      return notice('msg','Please choose a GIF smaller than 5 MB.','err');
+    }
+    job = readDataUrl(f); // Keep GIF bytes intact so animation is preserved.
+  } else {
+    job = shrinkImage(f,1400,.85);
+  }
+  job.then(function(d){
+    imgData = d; removeImg = false;
+    var s = document.getElementById('imgShot');
+    s.src = d; s.classList.remove('hidden');
+    document.getElementById('imgClear').classList.remove('hidden');
+  }).catch(function(err){ notice('msg', esc(err.message), 'err'); });
+};
+document.getElementById('imgClear').onclick = function(){
+  imgData=''; removeImg=true;
+  document.getElementById('imgShot').classList.add('hidden');
+  document.getElementById('imgFile').value='';
+  this.classList.add('hidden');
+};
+
+document.getElementById('previewBtn').onclick = openContributionPreview;
+document.getElementById('previewClose').onclick = closeContributionPreview;
+document.getElementById('previewBack').onclick = function(e){ if(e.target===this) closeContributionPreview(); };
+document.addEventListener('keydown', function(e){ if(e.key==='Escape' && !document.getElementById('previewBack').classList.contains('hidden')) closeContributionPreview(); });
+
+document.getElementById('saveBtn').onclick = function(){
+  var b = this;
+  var name = document.getElementById('authorName').value.trim();
+  var msg  = document.getElementById('message').value.trim();
+  if(!name) return notice('msg','Please enter your name.','err');
+  if(!msg)  return notice('msg','Please write a message.','err');
+  if(msg.length > MAXM) return notice('msg','Your message is too long for one page.','err');
+
+  b.disabled = true; b.innerHTML = '<div class="spin"></div> Saving…';
+  srv('apiSaveContribution', BOOK_ID, {
+    authorName:name, message:msg, imageData:imgData, removeImage:removeImg
+  }).then(function(){
+    clearNotice('msg');
+    document.getElementById('formBox').classList.add('hidden');
+    document.getElementById('doneBox').classList.remove('hidden');
+    window.scrollTo(0,0);
+  }).catch(function(e){
+    b.disabled=false; b.textContent = I.existing ? 'Save changes' : 'Add my page';
+    notice('msg', esc(e.message||'Could not save.'), 'err');
+  });
+};
+
+document.getElementById('delBtn').onclick = function(){
+  if(!confirm('Delete your page from this book? This cannot be undone.')) return;
+  var b = this; b.disabled = true; b.textContent = 'Deleting…';
+  srv('apiDeleteMyContribution', BOOK_ID).then(function(){ navigateTop(I.homeUrl); })
+  .catch(function(e){
+    b.disabled=false; b.textContent='Delete my page';
+    notice('msg', esc(e.message), 'err');
+  });
+};
+
+document.getElementById('doneEdit').onclick = function(){
+  navigateTop(I.homeUrl + '?page=contribute&id=' + encodeURIComponent(BOOK_ID));
+};
+
+(function init(){
+  if(!BOOK_ID){
+    document.getElementById('loading').innerHTML =
+      '<div class="note err">No book was specified in the link.</div>';
+    return;
+  }
+  srv('apiGetContributeInfo', BOOK_ID).then(function(r){
+    I = r;
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('main').classList.remove('hidden');
+    render();
+    attachEmoji('authorName','emoName',['😊','🙂','👋','❤️','⭐','🎉']);
+    attachEmoji('message','emoMsg',['🎉','🥳','❤️','🙏','👏','✨','🎈','😊']);
+  }).catch(function(e){
+    document.getElementById('loading').innerHTML =
+      '<div class="note err">'+esc(e.message||'This book could not be opened.')+'</div>';
+  });
+})();
+</script>
+</body>
+</html>
