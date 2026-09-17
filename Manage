@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+<head><base target="_top"><?!= include('Styles'); ?></head>
+<body>
+
+<div class="topbar"><div class="topbar-in">
+  <a class="logo" id="logoLink" href="#" target="_top"><div class="mk">PD</div><div class="nm">Celebration Book</div></a>
+</div></div>
+
+<div class="page">
+  <div id="loading" class="loading"><div class="spin"></div><div>Loading…</div></div>
+
+  <div id="goneView" class="hidden">
+    <div class="head"><div class="sp"><h1>Book deleted</h1><p class="lede" id="goneSub"></p></div></div>
+    <div class="note warn">The book, every message and every photo have been permanently removed.</div>
+    <a class="btn lg" id="goneHome" href="#" target="_top">Back to my books</a>
+  </div>
+
+  <div id="main" class="hidden">
+    <div class="crumb"><a id="crumbHome" href="#" target="_top">My books</a> &rsaquo; Manage</div>
+
+    <div class="head">
+      <div class="sp"><h1 id="hTitle"></h1><p class="lede" id="hSub"></p></div>
+      <div class="btnrow">
+        <a class="btn sec" id="btnPreview" target="_blank">Preview book</a>
+        <a class="btn sec" id="btnDup" href="#" target="_top">Duplicate</a>
+      </div>
+    </div>
+
+    <div id="msg"></div>
+    <div id="lifecycleNote"></div>
+
+    <div class="panel">
+      <div class="panel-h"><h2>Delivery</h2><div class="sp"></div>
+        <span class="pill plain" id="delState"></span></div>
+      <div class="panel-b">
+        <div id="delInfo"></div>
+        <div class="btnrow" style="margin-top:4px">
+          <button class="btn lg" id="btnSend">Send now</button>
+          <button class="btn sec" id="btnPdf">Generate book with latest contributions</button>
+          <a class="btn sec hidden" id="btnPdfOpen" target="_blank">Open PDF</a>
+        </div>
+        <div class="help" style="margin-top:12px" id="delHelp"></div>
+        <div class="help" style="margin-top:8px">Use <b>Send now</b> to deliver the finished book immediately instead of waiting for the scheduled delivery time.</div>
+      </div>
+    </div>
+
+
+    <div class="panel">
+      <div class="panel-h"><h2>Contributor link</h2></div>
+      <div class="panel-b">
+        <div class="copyrow">
+          <input type="text" id="lnk" readonly>
+          <button class="btn sec" onclick="copyFrom('lnk',this)">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><h2>Details</h2></div>
+      <div class="panel-b">
+        <div class="mockrow">
+          <div class="mcol">
+            <div class="field"><label>Occasion title</label>
+              <input type="text" id="fOcc" maxlength="60"><div id="emoOcc"></div></div>
+            <div class="field"><label>Who we're celebrating</label>
+              <input type="text" id="fHon" maxlength="90"><div id="emoHon"></div></div>
+            <div class="field"><label>Cover message</label>
+              <input type="text" id="fCov" maxlength="120"><div id="emoCov"></div></div>
+            <div class="field"><label>Guidance for contributors</label>
+              <textarea id="fWel" maxlength="400" style="min-height:74px"></textarea>
+              <div id="emoWel"></div></div>
+            <div class="field" style="margin-bottom:0"><label>Delivery date and time</label>
+              <input type="datetime-local" id="fDl">
+              <div class="help">Contributions close at this time and the finished book is sent automatically.</div></div>
+          </div>
+          <div class="cvprev">
+            <div class="mocklbl">Live cover preview</div>
+            <div class="cvcard" id="cvprev"></div>
+            <div class="cvnote">Updates as you type. Save to apply.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><h2>Appearance of the online book</h2></div>
+      <div class="panel-b">
+        <div class="note info" style="font-size:13px">
+          These style the <b>online book only</b>. The PDF and email always use Roche blue.
+        </div>
+        <div class="field"><label>Colour theme</label><div class="opts" id="themes"></div></div>
+        <div class="sep"></div>
+        <div class="mockrow">
+          <div class="mcol">
+            <div class="field" style="margin-bottom:0">
+              <label>Page background pattern</label><div class="opts" id="bgs"></div>
+              <div class="where">
+                <span class="lbl">Appears in</span>
+                <span class="tag on"><i>✓</i> Online book</span>
+                <span class="tag off"><i>✗</i> Not in the PDF</span>
+              </div>
+            </div>
+          </div>
+          <div><div class="mocklbl">Online page preview</div><div class="mock" id="mock"></div></div>
+        </div>
+        <div class="sep"></div>
+        <div class="field" style="margin-bottom:0">
+          <label>Custom background image</label>
+          <div class="upload" id="bgUp">
+            <div class="t">Choose a background image</div>
+            <div class="d">Online book only</div>
+          </div>
+          <input type="file" id="bgFile" accept="image/*" class="hidden">
+          <div class="btnrow" style="margin-top:10px">
+            <button class="btn sec sm hidden" id="bgClear" type="button">Use a pattern instead</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><h2>People</h2></div>
+      <div class="panel-b">
+        <div class="grid2">
+          <div class="field"><label>Deputies</label>
+            <textarea id="fDep" style="min-height:74px" placeholder="one email per line"></textarea>
+            <div class="help">Same management rights as the owner.</div></div>
+          <div class="field"><label>Recipients of the finished book</label>
+            <textarea id="fRec" style="min-height:74px" placeholder="one email per line"></textarea>
+            <div class="help">The final book is emailed automatically shortly after the delivery date.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="btnrow" style="margin-bottom:22px">
+      <button class="btn lg" id="btnSave">Save changes</button>
+      <button class="btn sec lg" id="btnContributorLink" type="button" onclick="copyFrom('lnk',this)">Contributor Link</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><h2>Contributions</h2><div class="sp"></div>
+        <span class="pill plain" id="cnt"></span></div>
+      <div class="panel-b tight" id="pages"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-h"><h2>Manage this book</h2></div>
+      <div class="panel-b">
+        <div class="btnrow">
+          <button class="btn sec" id="btnCancel">Cancel book</button>
+          <button class="btn sec hidden" id="btnReopen">Reopen book</button>
+          <button class="btn dgr" id="btnDelete">Delete permanently</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var BOOK_ID = '<?= bookId ?>';
+var D = null, HOME = '', emojiReady = false;
+var THEMES = [
+  {id:'roche',  name:'Roche Blue',  c1:'#1482FA', c2:'#0B41CD'},
+  {id:'sunset', name:'Sunset',      c1:'#F97316', c2:'#C2410C'},
+  {id:'golden', name:'Golden Hour', c1:'#EAB308', c2:'#A16207'},
+  {id:'blossom',name:'Blossom',     c1:'#F472B6', c2:'#BE185D'},
+  {id:'sage',   name:'Warm Sage',   c1:'#84A98C', c2:'#9A3412'}
+];
+var BGS = [
+  {id:'confetti', name:'Confetti'},{id:'balloons', name:'Balloons'},
+  {id:'streamers',name:'Streamers'},{id:'sparkles',name:'Sparkles'},
+  {id:'plain',    name:'Plain paper'}
+];
+var theme='roche', bgStyle='balloons', bgData='', removeBg=false, savedBg='';
+
+function drawCover(){
+  renderCoverPreview('cvprev', {
+    theme: theme,
+    occasion: document.getElementById('fOcc').value.trim(),
+    honouree: document.getElementById('fHon').value.trim(),
+    coverMessage: document.getElementById('fCov').value.trim(),
+    coverImageUrl: (D && D.coverImageUrl) || ''
+  });
+}
+function buildThemes(){
+  var h = document.getElementById('themes');
+  h.innerHTML = THEMES.map(function(t){
+    return '<div class="opt-c'+(t.id===theme?' on':'')+'" data-id="'+t.id+'">'+
+      '<div class="sw" style="background:linear-gradient(135deg,'+t.c1+','+t.c2+')"></div>'+
+      '<div class="nm">'+t.name+'</div></div>';
+  }).join('');
+  Array.prototype.forEach.call(h.querySelectorAll('.opt-c'), function(el){
+    el.onclick = function(){ theme = el.getAttribute('data-id');
+      buildThemes(); buildBgs(); drawMock(); drawCover(); };
+  });
+}
+function buildBgs(){
+  var h = document.getElementById('bgs');
+  h.innerHTML = BGS.map(function(b){
+    return '<div class="opt-c'+(b.id===bgStyle?' on':'')+'" data-id="'+b.id+'" data-theme="'+theme+'">'+
+      '<div class="pv"><div class="mini"><div class="l"></div><div class="l"></div><div class="l"></div></div></div>'+
+      '<div class="nm">'+b.name+'</div></div>';
+  }).join('');
+  Array.prototype.forEach.call(h.querySelectorAll('.opt-c'), function(el){
+    var id = el.getAttribute('data-id');
+    applyPattern(el.querySelector('.pv'), id, theme, .6);
+    el.onclick = function(){ bgStyle = id; buildBgs(); drawMock(); };
+  });
+}
+function curBg(){ if(bgData) return bgData; if(removeBg) return ''; return savedBg||''; }
+function drawMock(){
+  renderMock(document.getElementById('mock'), {bgStyle:bgStyle, theme:theme, bgImageUrl:curBg()});
+}
+
+function renderDelivery(){
+  var st = document.getElementById('delState');
+  var info = document.getElementById('delInfo');
+  var help = document.getElementById('delHelp');
+  var send = document.getElementById('btnSend');
+  var pdfOpen = document.getElementById('btnPdfOpen');
+  var recips = (D.recipients||'').split(/,\s*/).filter(String);
+
+  if(D.pdfUrl){ pdfOpen.href = D.pdfUrl; pdfOpen.classList.remove('hidden'); }
+  else { pdfOpen.classList.add('hidden'); }
+
+  if(D.status === 'delivered'){
+    st.textContent = 'Delivered';
+    info.innerHTML = '<div class="note ok"><b>Delivered on '+esc(fmtDate(D.sentAt))+'.</b></div>';
+    send.disabled = true; send.textContent = 'Already delivered';
+    help.textContent = 'The PDF remains available here until the book is deleted.';
+    return;
+  }
+  if(D.status === 'cancelled'){
+    st.textContent = 'Cancelled';
+    info.innerHTML = '<div class="note warn">This book is cancelled. No delivery email will be sent.</div>';
+    send.disabled = true; help.textContent = '';
+    return;
+  }
+  st.textContent = 'Scheduled';
+  info.innerHTML = recips.length
+    ? '<div class="note info">Sends automatically to <b>'+esc(recips.join(', '))+
+      '</b> shortly after '+esc(fmtDate(D.deadline))+'. You are copied in BCC.</div>'
+    : '<div class="note err"><b>No recipient set.</b> Add at least one email under People below.</div>';
+  send.disabled = false;
+  help.textContent = 'Emoji appear in the online book. In the PDF they appear as small images — check a test PDF first.';
+}
+
+function render(){
+  document.getElementById('hTitle').textContent = D.occasion + ' — ' + D.honouree;
+  document.getElementById('hSub').innerHTML =
+    statusPill(D.status) + ' &nbsp; Delivers ' + esc(fmtDate(D.deadline)) +
+    ' &nbsp; Organised by ' + esc(D.ownerName||D.ownerEmail) +
+    (D.role==='deputy' ? ' &nbsp; <span class="role">Deputy — full rights</span>' : '');
+
+  document.getElementById('btnPreview').href = D.links.book;
+  document.getElementById('btnDup').href = HOME + '?page=create&id=' + BOOK_ID;
+  document.getElementById('lnk').value = D.links.contribute;
+
+  document.getElementById('lifecycleNote').innerHTML =
+    (D.deleteOn && D.status !== 'cancelled')
+      ? '<div class="note info">Permanently deleted on <b>'+esc(D.deleteOn)+'</b>, '+
+        D.retentionDays+' days after closing.</div>' : '';
+
+  document.getElementById('fOcc').value = D.occasion||'';
+  document.getElementById('fHon').value = D.honouree||'';
+  document.getElementById('fCov').value = D.coverMessage||'';
+  document.getElementById('fWel').value = D.welcomeMessage||'';
+  document.getElementById('fRec').value = (D.recipients||'').split(/,\s*/).filter(String).join('\n');
+  document.getElementById('fDep').value = (D.deputies||'').split(/,\s*/).filter(String).join('\n');
+  var m = String(D.deadline).match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})/);
+  document.getElementById('fDl').value = m ? m[1] : '';
+
+  theme = D.theme||'roche'; bgStyle = D.bgStyle||'balloons';
+  savedBg = D.bgImageUrl||''; bgData=''; removeBg=false;
+  if(savedBg) document.getElementById('bgClear').classList.remove('hidden');
+  else        document.getElementById('bgClear').classList.add('hidden');
+  buildThemes(); buildBgs(); drawMock(); drawCover();
+
+  renderDelivery();
+
+  if(!emojiReady){
+    attachEmoji('fOcc','emoOcc',['🎉','🎊','🥳','🏆','✨','🎂','👏','🙏']);
+    attachEmoji('fHon','emoHon',['❤️','⭐','🌟','🥇','💙','🌸','🚀','🎓']);
+    attachEmoji('fCov','emoCov',['🎉','💐','✨','🥂','🌈','💖','🎈','🍀']);
+    attachEmoji('fWel','emoWel',['🎉','🙏','💌','✍️','📸','❤️','🥳','⏰']);
+    ['fOcc','fHon','fCov'].forEach(function(id){
+      document.getElementById(id).addEventListener('input', drawCover);
+    });
+    emojiReady = true;
+  }
+
+  document.getElementById('cnt').textContent =
+    D.pages.length + (D.pages.length===1?' page':' pages');
+  var p = document.getElementById('pages');
+  if(!D.pages.length){
+    p.innerHTML = '<div class="empty"><div class="t">No contributions yet</div>'+
+      '<div class="d">Share the contribution link with colleagues to start collecting messages.</div></div>';
+  } else {
+    p.innerHTML = '<div class="clist">'+D.pages.map(function(x){
+      var av = x.imageUrl
+        ? '<img class="av" src="'+x.imageUrl+'" onerror="this.style.display=\'none\'">'
+        : '<div class="noav">'+esc((x.authorName||'?').charAt(0).toUpperCase())+'</div>';
+      return '<div class="citem">'+av+'<div class="bd">'+
+        '<div class="nm">'+esc(x.authorName)+'</div>'+
+        '<div class="em">'+esc(x.authorEmail)+'</div>'+
+        '<div class="ms">'+esc(x.message).replace(/\n/g,'<br>')+'</div></div>'+
+        '<button class="btn dgr sm" onclick="rmPage(\''+x.pageId+'\')">Remove</button></div>';
+    }).join('')+'</div>';
+  }
+
+  document.getElementById('btnCancel').classList.toggle('hidden', D.status==='cancelled' || D.status==='delivered');
+  document.getElementById('btnReopen').classList.toggle('hidden', D.status!=='cancelled');
+}
+
+function rmPage(id){
+  if(!confirm('Remove this page? The message and photo will be deleted.')) return;
+  srv('apiRemovePage', BOOK_ID, id).then(load)
+    .catch(function(e){ notice('msg', esc(e.message), 'err'); });
+}
+
+document.getElementById('bgUp').onclick = function(){ document.getElementById('bgFile').click(); };
+document.getElementById('bgFile').onchange = function(e){
+  var f = e.target.files[0]; if(!f) return;
+  shrinkImage(f,1600,.82).then(function(x){
+    bgData = x; removeBg = false;
+    document.getElementById('bgClear').classList.remove('hidden');
+    drawMock();
+  }).catch(function(err){ notice('msg', esc(err.message), 'err'); });
+};
+document.getElementById('bgClear').onclick = function(){
+  bgData=''; removeBg=true; document.getElementById('bgFile').value='';
+  this.classList.add('hidden'); drawMock();
+};
+
+document.getElementById('btnSave').onclick = function(){
+  var b = this; b.disabled = true; b.innerHTML = '<div class="spin"></div> Saving…';
+  srv('apiUpdateBook', BOOK_ID, {
+    occasion: document.getElementById('fOcc').value.trim(),
+    honouree: document.getElementById('fHon').value.trim(),
+    coverMessage: document.getElementById('fCov').value.trim(),
+    welcomeMessage: document.getElementById('fWel').value.trim(),
+    recipients: document.getElementById('fRec').value.trim(),
+    deputies: document.getElementById('fDep').value.trim(),
+    deadline: document.getElementById('fDl').value,
+    theme: theme, bgStyle: bgStyle,
+    bgImageData: bgData, removeBgImage: removeBg
+  }).then(function(){
+    b.disabled=false; b.textContent='Save changes';
+    notice('msg','Changes saved.','ok'); load();
+  }).catch(function(e){
+    b.disabled=false; b.textContent='Save changes';
+    notice('msg', esc(e.message||'Could not save.'), 'err');
+  });
+};
+
+
+document.getElementById('btnPdf').onclick = function(){
+  var b = this; b.disabled = true; b.innerHTML = '<div class="spin"></div> Building…';
+  notice('msg','Building the book with the latest contributions. With many photos this can take a minute.','info');
+  srv('apiGeneratePdf', BOOK_ID).then(function(r){
+    b.disabled=false; b.textContent='Generate book with latest contributions';
+    notice('msg','Book ready — <b>'+esc(r.name)+'</b> ('+r.sizeMb+' MB).','ok');
+    load();
+  }).catch(function(e){
+    b.disabled=false; b.textContent='Generate book with latest contributions';
+    notice('msg', esc(e.message||'The book could not be created.'), 'err');
+  });
+};
+
+document.getElementById('btnSend').onclick = function(){
+  if(!document.getElementById('fRec').value.trim())
+    return notice('msg','Please add at least one recipient, save, then send.','err');
+  if(!confirm('Send the celebration book now? This cannot be undone.')) return;
+  var b = this; b.disabled = true; b.innerHTML = '<div class="spin"></div> Sending…';
+  srv('apiSendNow', BOOK_ID).then(function(r){
+    b.disabled=false; b.textContent='Send now';
+    notice('msg', r.sent
+      ? 'Delivered to '+r.recipients+' recipient'+(r.recipients===1?'':'s')+
+        (r.attached?' with the PDF attached.':' (PDF too large — link only).')
+      : 'Not sent — '+esc(r.reason)+'.', r.sent?'ok':'warn');
+    load();
+  }).catch(function(e){
+    b.disabled=false; b.textContent='Send now';
+    notice('msg', esc(e.message||'Could not send.'), 'err');
+  });
+};
+
+document.getElementById('btnCancel').onclick = function(){
+  if(!confirm('Cancel this book? Contributions close and no delivery email is sent.')) return;
+  srv('apiCancelBook', BOOK_ID).then(function(){
+    notice('msg','The book has been cancelled.','warn'); load();
+  }).catch(function(e){ notice('msg', esc(e.message), 'err'); });
+};
+
+document.getElementById('btnReopen').onclick = function(){
+  var v = document.getElementById('fDl').value;
+  if(!v) return notice('msg','Set a new closing date above, then reopen.','err');
+  srv('apiReopenBook', BOOK_ID, v).then(function(){
+    notice('msg','The book has been reopened.','ok'); load();
+  }).catch(function(e){ notice('msg', esc(e.message), 'err'); });
+};
+
+document.getElementById('btnDelete').onclick = function(){
+  if(!confirm('Delete this book permanently? Every message and photo will be erased.')) return;
+  if(!confirm('Please confirm once more — this is permanent.')) return;
+  var b = this; b.disabled = true; b.innerHTML = '<div class="spin"></div> Deleting…';
+  var label = D.occasion + ' — ' + D.honouree;
+  srv('apiDeleteBook', BOOK_ID).then(function(){
+    document.getElementById('goneSub').textContent = label;
+    document.getElementById('goneHome').href = HOME;
+    document.getElementById('main').classList.add('hidden');
+    document.getElementById('goneView').classList.remove('hidden');
+    window.scrollTo(0,0);
+  }).catch(function(e){
+    b.disabled = false; b.textContent = 'Delete permanently';
+    notice('msg', esc(e.message), 'err');
+  });
+};
+
+function load(){
+  return srv('apiGetManage', BOOK_ID).then(function(r){
+    D = r; HOME = r.homeUrl;
+    document.getElementById('logoLink').href = HOME;
+    document.getElementById('crumbHome').href = HOME;
+    document.getElementById('goneHome').href = HOME;
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('main').classList.remove('hidden');
+    render();
+  }).catch(function(e){
+    document.getElementById('loading').innerHTML =
+      '<div class="note err">'+esc(e.message||'Could not load this book.')+'</div>';
+  });
+}
+load();
+</script>
+</body>
+</html>
