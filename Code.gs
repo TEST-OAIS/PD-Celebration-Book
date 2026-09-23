@@ -1,5 +1,5 @@
 /***********************************************************************
- * PD CELEBRATION BOOK — v6.11
+ * PD CELEBRATION BOOK — v6.11  
  * v6.11 PDF FIX: no blank overflow page after photo pages;
  * contributors without a photo get ONE page (message only).
  * SETUP: run  setup  once.   DIAGNOSE: run  diagnose
